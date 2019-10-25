@@ -1,0 +1,13 @@
+name = "GameZero"
+uuid = "9da27670-f782-11e9-1da1-f53579315bfe"
+authors = ["Avik Sengupta"]
+version = "0.1.0"
+
+[compat]
+julia = "1.5"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
