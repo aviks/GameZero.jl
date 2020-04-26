@@ -2,7 +2,8 @@ module GameZero
 using Colors
 using Random
 
-export Actor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule
+export Actor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule,
+        collide, angle, distance
 export Keys, MouseButtons, KeyMods
 
 using SimpleDirectMediaLayer
