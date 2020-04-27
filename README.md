@@ -6,6 +6,8 @@
 
 A zero overhead game development framework for beginners.
 
+## Example
+The best way to learn how to use this package is by looking at code. There are some simple examples in the [example subdirectory](https://github.com/aviks/GameZero.jl/tree/master/example/BasicGame). More comprehensive examples are listed in [GZExamples](https://github.com/SquidSinker/GZExamples).
 ## Status
 This is an early development snapshot. Watch this space for improvements.
 
