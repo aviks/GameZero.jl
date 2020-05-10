@@ -51,6 +51,7 @@ const scheduler = Ref{Scheduler}()
 elapsed(s::Scheduler) = elapsed(s.timer)
 Base.push!(s::Scheduler, x::Scheduled) = push!(s.actions, x)
 Base.filter!(x::Scheduled, s::Scheduler) = filter!(a->x!=a, s.actions)
+clear!(s::Scheduler) = deleteat!(s.actions, 1:length(s.actions))
 
 """
 A scheduled action that is run once. The action is a zero-argument function that is wrapped as a

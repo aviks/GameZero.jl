@@ -9,17 +9,6 @@ mutable struct Actor
     scale::Float64
 end
 
-function image_surface(image::String)
-    image_path = joinpath(game[].location, "images")
-    image_file = joinpath(image_path, image)
-    if !isfile(image_file);  throw(ArgumentError("No image for actor: $image in $image_path")); end
-    sf = SDL2.IMG_Load(image_file)
-    if sf == C_NULL
-        throw("Error loading $image_file")
-    end
-    return sf
-end
-
 function Actor(image::String)
     sf=image_surface(image)
     w, h = size(sf)
@@ -71,6 +60,7 @@ function distance(a::Actor, target::Actor)
     distance(a, target.pos...)
 end
 
+"""Distance in pixels between an actor and a point in space"""
 function distance(a::Actor, tx, ty)
     myx, myy = a.pos
     dx = tx - myx

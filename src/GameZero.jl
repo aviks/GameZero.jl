@@ -3,7 +3,7 @@ using Colors
 using Random
 
 export Actor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule,
-        collide, angle, distance
+        collide, angle, distance, play_music, play_sound, line
 export Keys, MouseButtons, KeyMods
 
 using SimpleDirectMediaLayer
@@ -13,28 +13,16 @@ include("keyboard.jl")
 include("timer.jl")
 include("window.jl")
 include("event.jl")
+include("resources.jl")
 include("actor.jl")
+include("screen.jl")
 
 #Magic variables
 const HEIGHTSYMBOL = :HEIGHT
 const WIDTHSYMBOL = :WIDTH
 const BACKSYMBOL = :BACKGROUND
 
-struct Screen
-    window
-    renderer
-    height::Int
-    width::Int
-    background::ARGB
 
-    function Screen(name, w, h, color)
-        win, renderer = makeWinRenderer(name, w, h)
-        if !(color isa ARGB)
-            color = ARGB(color)
-        end
-        new(win, renderer, h, w, color)
-    end
-end
 
 mutable struct Game
     screen::Screen
@@ -68,17 +56,6 @@ const timer = WallTimer()
 const game = Ref{Game}()
 const playing = Ref{Bool}(false)
 const paused = Ref{Bool}(false)
-function clear(s::Screen)
-    fill(s, s.background)
-end
-
-function Base.fill(s::Screen, c::Colorant)
-    SDL2.SetRenderDrawColor(
-        s.renderer,
-        Int.(reinterpret.((red(c), green(c), blue(c), alpha(c))))...,
-    )
-    SDL2.RenderClear(s.renderer)
-end
 
 function __init__()
 
@@ -191,7 +168,6 @@ getMouseX(e) = bitcat(Int32, e[23:-1:20])
 getMouseY(e) = bitcat(Int32, e[27:-1:24])
 
 function initgame(jlf::String)
-    SDL2.init()
     global playing, paused
     if !isfile(jlf)
         ArgumentError("File not found: $jlf")
@@ -200,6 +176,7 @@ function initgame(jlf::String)
     module_name = Symbol(name*"_"*randstring(5))
     game_module = Module(module_name)
     @debug "Initialised Anonymous Game Module" module_name
+    initSDL()
     game[] = Game()
     scheduler[] = Scheduler()
     g = game[]
@@ -228,6 +205,7 @@ function initgame(jlf::String)
         if !isa(e, QuitException) && !isa(e, InterruptException)
             @error e exception = (e, catch_backtrace())
         end
+    finally
         GameZero.quitSDL(game[])
     end
 end
@@ -238,12 +216,13 @@ function getfn(m::Module, s::Symbol, maxargs=3)
         fn = getfield(m, s)
 
         ms = copy(methods(fn).ms)
+        filter!(x->x.module == m, ms)
         if length(ms) > 1
             sort!(ms, by=x->x.nargs, rev=true)
         end
         m = ms[1]
         if (m.nargs - 1) > maxargs
-            error("Found an $s function with $(m.nargs-1) arguments. A maximum of $maxargs arguments are allowed.")
+            error("Found a $s function with $(m.nargs-1) arguments. A maximum of $maxargs arguments are allowed.")
         end
         @debug "Event method" fn m.nargs
         #TODO Validate types for arguments
@@ -261,14 +240,52 @@ end
 # pause the interpreter. For release builds, the catch() block will call quitSDL().
 struct QuitException <: Exception end
 
+function getSDLError()
+    x = SDL2.GetError()
+    return unsafe_string(x)
+end
+
+function initSDL()
+    SDL2.GL_SetAttribute(SDL2.GL_MULTISAMPLEBUFFERS, 4)
+    SDL2.GL_SetAttribute(SDL2.GL_MULTISAMPLESAMPLES, 4)
+    r = SDL2.Init(UInt32(SDL2.INIT_VIDEO | SDL2.INIT_AUDIO))
+    if r != 0
+        error("Uanble to initialise SDL: $(getSDLError())")
+    end
+    SDL2.TTF_Init()
+
+    mix_init_flags = SDL2.MIX_INIT_FLAC|SDL2.MIX_INIT_MP3|SDL2.MIX_INIT_OGG
+    inited = SDL2.Mix_Init(Int32(mix_init_flags))
+    if inited & mix_init_flags != mix_init_flags
+        @warn "Failed to initialise audio mixer properly. All sounds may not play correctly\n$(getSDLError())"
+    end
+
+    device = SDL2.Mix_OpenAudio(Int32(22050), UInt16(SDL2.MIX_DEFAULT_FORMAT), Int32(2), Int32(1024) )
+    if device != 0
+        @warn "No audio device available, sounds and music will not play.\n$(getSDLError())"
+        SDL2.Mix_CloseAudio()
+    end
+end
+
 function quitSDL(g::Game)
     # Need to close the callback before quitting SDL to prevent it from hanging
     # https://github.com/n0name/2D_Engine/issues/3
+    @debug "Quitting the game"
+    clear!(scheduler[])
     SDL2.DelEventWatch(window_event_watcher_cfunc[], g.screen.window);
     SDL2.DestroyRenderer(g.screen.renderer)
     SDL2.DestroyWindow(g.screen.window)
+    #Run all finalisers
+    GC.gc();GC.gc();
+    quitSDL()
+end
+
+function quitSDL()
+    SDL2.Mix_HaltMusic()
+    SDL2.Mix_HaltChannel(Int32(-1))
     SDL2.Mix_CloseAudio()
     SDL2.TTF_Quit()
+    SDL2.Mix_Quit()
     SDL2.Quit()
 end
 

@@ -8,6 +8,8 @@ dy = 2
 
 a=Actor("alien.png")
 
+play_music("radetzky_ogg")
+
 function draw(g::Game)
     draw(a)
 end
@@ -18,17 +20,12 @@ function update(g::Game)
     a.pos=a.pos .+ (dx, dy)
     if a.x > 400-a.w || a.x < 2
         dx = -dx
+        play_sound("eep")
     end
     if a.y > 400-a.h || a.y < 2
         dy = -dy
+        play_sound("eep")
     end
-    # if count % 10 ==0
-    #     if a.image == "alien.png"
-    #         a.image = "alien_hurt.png"
-    #     else
-    #         a.image = "alien.png"
-    #     end
-    # end
 
     if g.keyboard.DOWN
         dy = 2
