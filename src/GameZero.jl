@@ -14,8 +14,8 @@ include("timer.jl")
 include("window.jl")
 include("event.jl")
 include("resources.jl")
-include("actor.jl")
 include("screen.jl")
+include("actor.jl")
 
 #Magic variables
 const HEIGHTSYMBOL = :HEIGHT

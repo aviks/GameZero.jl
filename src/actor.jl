@@ -1,45 +1,65 @@
 
 mutable struct Actor
     image::String
-    surface
-    w::Int
-    h::Int
-    x::Int
-    y::Int
+    surface::Ptr{SDL2.Surface}
+    position::Rect
     scale::Float64
+    angle::Int
+    data::Dict{Symbol, Any}
 end
 
 function Actor(image::String)
     sf=image_surface(image)
     w, h = size(sf)
-    return Actor(image, sf, w, h, 0, 0, 1)
+    return Actor(image, sf, Rect(0, 0, Int(w), Int(h)), 1.0 , 0, Dict{Symbol,Any}())
 end
 
 function Base.setproperty!(s::Actor, p::Symbol, x)
-    if p == :pos
-        if typeof(x) != Tuple{Int, Int}; throw(ArgumentError(":pos needs a tuple of Integers")); end
-        setfield!(s, :x, x[1])
-        setfield!(s, :y, x[2])
+    if hasfield(Actor, p)
+        setfield!(s, p, x)
     elseif p == :image
         sf = image_surface(x)
-        setfield!(s, p, x)
         setfield!(s, :surface, sf)
+    elseif p == :x
+        return getfield(s, :position).x = x
+    elseif p == :y
+        return getfield(s, :position).y = x
+    elseif p == :w
+        return getfield(s, :position).w = x
+    elseif p == :h
+        return getfield(s, :position).h = x
     else
-        setfield!(s, p, x)
+        data = getfield(s, :data)[p] = x
     end
 end
 
+
 function Base.getproperty(s::Actor, p::Symbol)
-    if p == :pos
-        return (s.x, s.y)
+    if hasfield(Actor, p)
+        getfield(s, p)
+    elseif p == :x
+        return getfield(s, :position).x
+    elseif p == :y
+        return getfield(s, :position).y
+    elseif p == :w
+        return getfield(s, :position).w
+    elseif p == :h
+        return getfield(s, :position).h
     else
-        getfield(s, p,)
+        data = getfield(s, :data)
+        if haskey(data, p)
+            return data[p]
+        else 
+            @warn "Unknown data $p requested from Actor($(s.image))"
+            return nothing
+        end
     end
 end
 
 function draw(a::Actor)
     texture = SDL2.CreateTextureFromSurface(game[].screen.renderer, a.surface)
-    SDL2.RenderCopy(game[].screen.renderer, texture, C_NULL, Ref(SDL2.Rect(a.x, a.y, a.w, a.h)) )
+    r=a.position
+    SDL2.RenderCopy(game[].screen.renderer, texture, C_NULL, Ref(SDL2.Rect(r.x, r.y, r.w, r.h)) )
 end
 
 """Angle to the horizontal, of the line between two actors, in degrees"""

@@ -17,7 +17,8 @@ end
 function update(g::Game)
     global count, dx, dy
     count = count+1
-    a.pos=a.pos .+ (dx, dy)
+    a.position.x += dx
+    a.position.y += dy
     if a.x > 400-a.w || a.x < 2
         dx = -dx
         play_sound("eep")
