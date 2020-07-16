@@ -29,7 +29,13 @@ function Base.setproperty!(s::Actor, p::Symbol, x)
     elseif p == :h
         return getfield(s, :position).h = x
     else
-        data = getfield(s, :data)[p] = x
+        position = getfield(s, :position)
+        v = getfield(position, p)
+        if v != nothing
+            return v
+        else
+            data = getfield(s, :data)[p] = x
+        end
     end
 end
 
@@ -37,21 +43,19 @@ end
 function Base.getproperty(s::Actor, p::Symbol)
     if hasfield(Actor, p)
         getfield(s, p)
-    elseif p == :x
-        return getfield(s, :position).x
-    elseif p == :y
-        return getfield(s, :position).y
-    elseif p == :w
-        return getfield(s, :position).w
-    elseif p == :h
-        return getfield(s, :position).h
     else
-        data = getfield(s, :data)
-        if haskey(data, p)
-            return data[p]
-        else 
-            @warn "Unknown data $p requested from Actor($(s.image))"
-            return nothing
+        position = getfield(s, :position)
+        v = getfield(position, p)
+        if v != nothing
+            return v
+        else
+            data = getfield(s, :data)
+            if haskey(data, p)
+                return data[p]
+            else 
+                @warn "Unknown data $p requested from Actor($(s.image))"
+                return nothing
+            end
         end
     end
 end
@@ -98,17 +102,21 @@ function Base.size(s::Ptr{SDL2.Surface})
 end
 
 function collide(a, x::Integer, y::Integer)
+    a=rect(a)
     return a.x <= x < (a.x + a.w) &&
         a.y <= y < (a.y + a.h)
 end
 
 collide(a, pos::Tuple) = collide(a, pos[1], pos[2])
 
-
-function  collide(a, b)
+function collide(a, b)
+    a=rect(a)
+    b=rect(b)
     return a.x < b.x + b.w &&
         a.y < b.y + b.h &&
         a.x + a.w > b.x &&
         a.y + a.h > b.y
 
 end
+
+rect(a::Actor) = a.position
