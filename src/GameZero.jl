@@ -30,12 +30,12 @@ mutable struct Game
     location::String
     game_module::Module
     keyboard::Keyboard
-    render_function
-    update_function
-    onkey_function
-    onmousedown_function
-    onmouseup_function
-    onmousemove_function
+    render_function::Function 
+    update_function::Function 
+    onkey_function::Function 
+    onmousedown_function::Function 
+    onmouseup_function::Function 
+    onmousemove_function::Function 
     Game() = new()
 end
 
@@ -122,7 +122,6 @@ end
 
 function handleEvents!(g::Game, e, t)
     global playing, paused
-    # Handle Events
     if (t == SDL2.KEYDOWN || t == SDL2.KEYUP)
         handleKeyPress(g::Game, e, t)
     elseif (t == SDL2.MOUSEBUTTONUP || t == SDL2.MOUSEBUTTONDOWN)
@@ -179,7 +178,7 @@ getMouseClickY(e) = bitcat(Int32, e[27:-1:24])
 getMouseMoveX(e) = bitcat(Int32, e[24:-1:21])
 getMouseMoveY(e) = bitcat(Int32, e[28:-1:25])
 
-function initgame(jlf::String)
+function rungame(jlf::String)
     global playing, paused
     if !isfile(jlf)
         ArgumentError("File not found: $jlf")
@@ -306,7 +305,7 @@ function main()
         throw(ArgumentError("No file to run"))
     end
     jlf = ARGS[1]
-    initgame(jlf)
+    rungame(jlf)
 end
 
 
