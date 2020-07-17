@@ -8,11 +8,17 @@ mutable struct Actor
     data::Dict{Symbol, Any}
 end
 
-function Actor(image::String)
+function Actor(image::String; kv...)
     sf=image_surface(image)
     w, h = size(sf)
-    return Actor(image, sf, Rect(0, 0, Int(w), Int(h)), 1.0 , 0, Dict{Symbol,Any}())
+    a = Actor(image, sf, Rect(0, 0, Int(w), Int(h)), 1.0 , 0, Dict{Symbol,Any}())
+
+    for (k, v) in kv
+        setproperty!(a, k, v)
+    end
+    return a
 end
+
 
 function Base.setproperty!(s::Actor, p::Symbol, x)
     if hasfield(Actor, p)
@@ -20,17 +26,9 @@ function Base.setproperty!(s::Actor, p::Symbol, x)
     elseif p == :image
         sf = image_surface(x)
         setfield!(s, :surface, sf)
-    elseif p == :x
-        return getfield(s, :position).x = x
-    elseif p == :y
-        return getfield(s, :position).y = x
-    elseif p == :w
-        return getfield(s, :position).w = x
-    elseif p == :h
-        return getfield(s, :position).h = x
     else
         position = getfield(s, :position)
-        v = getfield(position, p)
+        v = getproperty(position, p)
         if v != nothing
             return v
         else
@@ -45,7 +43,7 @@ function Base.getproperty(s::Actor, p::Symbol)
         getfield(s, p)
     else
         position = getfield(s, :position)
-        v = getfield(position, p)
+        v = getproperty(position, p)
         if v != nothing
             return v
         else
@@ -67,12 +65,14 @@ function draw(a::Actor)
 end
 
 """Angle to the horizontal, of the line between two actors, in degrees"""
-function angle(a::Actor, target::Actor)
+function Base.angle(a::Actor, target::Actor)
     angle(a, a.pos...)
 end
 
+Base.angle(a::Actor, txy::Tuple) = angle(a, txy[1], txy[2])
+
 """Angle to the horizontal, of the line between an actor and a point in space, in degrees"""
-function angle(a::Actor, tx, ty)
+function Base.angle(a::Actor, tx, ty)
     myx, myy = a.pos
     dx = tx - myx
     dy = myy - ty

@@ -35,7 +35,7 @@ mutable struct Game
     onkey_function
     onmousedown_function
     onmouseup_function
-
+    onmousemove_function
     Game() = new()
 end
 
@@ -128,7 +128,8 @@ function handleEvents!(g::Game, e, t)
     elseif (t == SDL2.MOUSEBUTTONUP || t == SDL2.MOUSEBUTTONDOWN)
         handleMouseClick(g::Game, e, t)
     #TODO elseif (t == SDL2.MOUSEWHEEL); handleMouseScroll(e)
-    #TODO elseif (t == SDL2.MOUSEMOTION); handleMousePan(e)
+    elseif (t == SDL2.MOUSEMOTION)
+        handleMousePan(g::Game, e, t)
     elseif (t == SDL2.QUIT)
         paused[] = playing[] = false
     end
@@ -148,10 +149,9 @@ function handleKeyPress(g::Game, e, t)
 end
 
 function handleMouseClick(g::Game, e, t)
-    button = getMouseButton(e)
-    x = getMouseX(e)
-    y = getMouseY(e)
-
+    button = getMouseButtonClick(e)
+    x = getMouseClickX(e)
+    y = getMouseClickY(e)
     @debug "Mouse Button" button, x, y
     if (t == SDL2.MOUSEBUTTONUP)
         Base.invokelatest(g.onmouseup_function, g, (x, y), MouseButtons.MouseButton(button))
@@ -160,13 +160,24 @@ function handleMouseClick(g::Game, e, t)
     end
 end
 
+
+function handleMousePan(g::Game, e, t)
+    x = getMouseMoveX(e)
+    y = getMouseMoveY(e)
+    @debug "Mouse Move" x, y
+    Base.invokelatest(g.onmousemove_function, g, (x, y))
+end
+
 getKeySym(e) = bitcat(UInt32, e[24:-1:21])
 getKeyRepeat(e) = bitcat(UInt8, e[14:-1:14])
 getKeyMod(e) = bitcat(UInt16, e[26:-1:25])
 
-getMouseButton(e) = bitcat(UInt8, e[17:-1:17])
-getMouseX(e) = bitcat(Int32, e[23:-1:20])
-getMouseY(e) = bitcat(Int32, e[27:-1:24])
+getMouseButtonClick(e) = bitcat(UInt8, e[17:-1:17])
+getMouseClickX(e) = bitcat(Int32, e[23:-1:20])
+getMouseClickY(e) = bitcat(Int32, e[27:-1:24])
+
+getMouseMoveX(e) = bitcat(Int32, e[24:-1:21])
+getMouseMoveY(e) = bitcat(Int32, e[28:-1:25])
 
 function initgame(jlf::String)
     global playing, paused
@@ -196,7 +207,7 @@ function initgame(jlf::String)
     g.onkey_function = getfn(game_module, :on_key_down, 3)
     g.onmouseup_function = getfn(game_module, :on_mouse_up, 3)
     g.onmousedown_function = getfn(game_module, :on_mouse_down, 3)
-
+    g.onmousemove_function = getfn(game_module, :on_mouse_move, 2)
     g.screen = initscreen(game_module, "GameZero::"*name)
     clear(g.screen)
     try

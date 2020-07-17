@@ -50,8 +50,8 @@ function Base.setproperty!(s::Geom, p::Symbol, x)
         setfield!(s, p, x)
     else
         v = getPos(Val(p), s, x)
-        setfield!(s, :x, round(Int, v[1]))
-        setfield!(s, :y, round(Int, v[2]))
+        setfield!(s, :x, Int(round(v[1])))
+        setfield!(s, :y, Int(round(v[2])))
     end
 end
 
@@ -77,8 +77,8 @@ getPos(::Val{:topright}, s::Rect, u, v) = (u-s.w, v)
 getPos(::Val{:bottomleft}, s::Rect, u, v) = (u, v-s.h)
 getPos(::Val{:bottomright}, s::Rect, u, v) = (u-s.w, v-s.h)
 getPos(::Val{:center}, s::Rect, u, v) = (u-s.w/2, v-s.h/2)
-getPos(::Val{:centerx}, s::Rect, u, v) = (u-s.w/2, s.y)
-getPos(::Val{:centery}, s::Rect, u, v) = (s.x, v-s.h/2)
+getPos(::Val{:centerx}, s::Rect, u) = (u-s.w/2, s.y)
+getPos(::Val{:centery}, s::Rect, v) = (s.x, v-s.h/2)
 getPos(::Val{:centerleft}, s::Rect, u, v) = (u, v-s.h/2)
 getPos(::Val{:centerright}, s::Rect, u, v) = (u-s.w, v-s.h/2)
 getPos(::Val{:bottomcenter}, s::Rect, u, v) = (u-s.w/2, v-s.h)
@@ -90,8 +90,8 @@ getPos(::Val{:top}, s::Rect) = s.y
 getPos(::Val{:bottom}, s::Rect) = s.y-s.h
 getPos(::Val{:pos}, s::Rect) = getPos(Val(:topleft), s)
 getPos(::Val{:topleft}, s::Rect) = (s.x, s.y)
-getPos(::Val{:topright}, s::Rect) = (s.x-s.w, s.y)
-getPos(::Val{:bottomleft}, s::Rect) = (s.x, s.y-s.h)
+getPos(::Val{:topright}, s::Rect) = (s.x+s.w, s.y)
+getPos(::Val{:bottomleft}, s::Rect) = (s.x, s.y+s.h)
 getPos(::Val{:bottomright}, s::Rect) = (s.x-s.w, s.y-s.h)
 getPos(::Val{:center}, s::Rect) = (s.x-s.w/2, s.y-s.h/2)
 getPos(::Val{:centerx}, s::Rect) = s.x-s.w/2
@@ -102,8 +102,12 @@ getPos(::Val{:bottomcenter}, s::Rect) = (s.x-s.w/2, s.y-s.h)
 getPos(::Val{:topcenter}, s::Rect) = (s.x-s.w/2, s.y)
 
 getPos(::Val{:center}, s::Circle, u, v) = (u, v)
-getPos(::Val{:centerx}, s::Circle, u) = u
-getPos(::Val{:centery}, s::Circle, v) = v
+getPos(::Val{:top}, s::Circle, v) = (s.x, v-s.r)
+getPos(::Val{:bottom}, s::Circle, v) = (s.x, v+s.r)
+getPos(::Val{:left}, s::Circle, u) = (u-s.r, s.y)
+getPos(::Val{:right}, s::Circle, u) = (u+s.r, s.y)
+getPos(::Val{:centerx}, s::Circle, u) = (u, s.y)
+getPos(::Val{:centery}, s::Circle, v) = (s.x, v)
 
 getPos(::Val{:center}, s::Circle) = (s.x, s.y)
 getPos(::Val{:top}, s::Circle) = s.y-s.r
@@ -111,7 +115,7 @@ getPos(::Val{:bottom}, s::Circle) = s.y+s.r
 getPos(::Val{:left}, s::Circle) = s.x-s.r
 getPos(::Val{:right}, s::Circle) = s.x+s.r
 getPos(::Val{:centerx}, s::Circle) = s.x
-getPos(::Val{:centery}, s::Circle) = s.x
+getPos(::Val{:centery}, s::Circle) = s.y
 
 function clear(s::Screen)
     fill(s, s.background)
@@ -136,7 +140,7 @@ function draw(s::Screen, l::Line, c::Colorant=colorant"black")
         s.renderer,
         sdl_colors(c)...,
     )
-    SDL2.RenderDrawLine(s.renderer, l.x1, l.y1, l.x2, l.y2)
+    SDL2.RenderDrawLine(s.renderer, Cint.((l.x1, l.y1, l.x2, l.y2))...)
 end
 
 function draw(s::Screen, r::Rect, c::Colorant=colorant"black"; fill=false)
@@ -162,12 +166,12 @@ function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false
         s.renderer,
         sdl_colors(c)...,
     )
-    diameter = Cint(circle.r * 2);
+    diameter = Cint(round(circle.r * 2));
 
-    centreX = Cint(circle.x)
-    centreY = Cint(circle.y)
+    centreX = Cint(round(circle.x))
+    centreY = Cint(round(circle.y))
 
-    x = Cint(circle.r - 1)
+    x = Cint(round(circle.r - 1))
     y = Cint(0)
     tx = Cint(1)
     ty = Cint(1)
