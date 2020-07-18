@@ -4,7 +4,7 @@ mutable struct Actor
     surface::Ptr{SDL2.Surface}
     position::Rect
     scale::Float64
-    angle::Int
+    angle::Float64
     data::Dict{Symbol, Any}
 end
 
@@ -21,18 +21,18 @@ end
 
 
 function Base.setproperty!(s::Actor, p::Symbol, x)
-    if hasfield(Actor, p)
-        setfield!(s, p, x)
-    elseif p == :image
+    if p == :image
         sf = image_surface(x)
         setfield!(s, :surface, sf)
+    elseif hasfield(Actor, p)
+        setfield!(s, p, convert(fieldtype(Actor, p), x))
     else
         position = getfield(s, :position)
         v = getproperty(position, p)
         if v != nothing
-            return v
+            setproperty!(position, p, x)
         else
-            data = getfield(s, :data)[p] = x
+            getfield(s, :data)[p] = x
         end
     end
 end

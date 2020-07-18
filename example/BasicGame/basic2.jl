@@ -1,16 +1,20 @@
 
 HEIGHT = 200
 WIDTH = 400
-colors = range(colorant"red", colorant"green")
+colors = range(colorant"black", colorant"white")
 current_color, color_state = iterate(colors)
 
 function draw(g::Game)
     fill(current_color)
-    draw(GameZero.Line(50, 100, 350, 100), colorant"white")
-    draw(GameZero.Rect(50, 100, 20, 50), colorant"red", true)
-    draw(GameZero.Rect(50, 100, 20, 50), colorant"white")
-    draw(GameZero.Circle(330, 80, 20), colorant"red", true)
-    draw(GameZero.Circle(330, 80, 20), colorant"white")
+    draw(Line(50, 100, 350, 100), colorant"white")
+    draw(Rect(50, 100, 20, 50), colorant"red", fill=true)
+    draw(Rect(50, 100, 20, 50), colorant"white")
+    draw(Circle(330, 80, 20), colorant"red", fill=true)
+    draw(Circle(330, 80, 20), colorant"white")
+
+    draw(Circle(0,0,50), colorant"red", fill=true)
+    draw(Circle(WIDTH,HEIGHT,50), colorant"green", fill=true)
+
 end
 
 function update(g::Game)
