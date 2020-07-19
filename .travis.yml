@@ -13,15 +13,15 @@ julia:
 matrix:
   allow_failures:
     - julia: nightly
-    exclude:
-  - os: osx
-    julia: 1.0
-  - os: windows
-    julia: 1.0
-  - os: osx
-    julia: nightly
-  - os: windows
-    julia: nightly
+  exclude:
+    - os: osx
+      julia: 1.0
+    - os: windows
+      julia: 1.0
+    - os: osx
+      julia: nightly
+    - os: windows
+      julia: nightly
   fast_finish: true
 notifications:
   email: false
