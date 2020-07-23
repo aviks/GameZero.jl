@@ -47,7 +47,7 @@ Base.convert(T::Type{SDL2.Rect}, r::Rect) = SDL2.Rect(Cint.((r.x, r.y, r.w, r.h)
 
 function Base.setproperty!(s::Geom, p::Symbol, x)
     if hasfield(typeof(s), p)
-        setfield!(s, p, x)
+        setfield!(s, p, Int(round(x)))
     else
         v = getPos(Val(p), s, x)
         setfield!(s, :x, Int(round(v[1])))
