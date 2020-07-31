@@ -3,7 +3,7 @@ using Colors
 using Random
 
 export Actor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule,
-        collide, angle, distance, play_music, play_sound, line, clear
+        collide, angle, distance, play_music, play_sound, line, clear, rungame
 export Keys, MouseButtons, KeyMods
 export Line, Rect, Circle
 
@@ -180,6 +180,20 @@ getMouseMoveY(e) = bitcat(Int32, e[28:-1:25])
 
 function rungame(jlf::String)
     global playing, paused
+    g = initgame(jlf::String)
+    try
+        playing[] = paused[] = true
+        mainloop(g)
+    catch e
+        if !isa(e, QuitException) && !isa(e, InterruptException)
+            @error e exception = (e, catch_backtrace())
+        end
+    finally
+        GameZero.quitSDL(game[])
+    end
+end
+
+function initgame(jlf::String)
     if !isfile(jlf)
         ArgumentError("File not found: $jlf")
     end
@@ -209,17 +223,8 @@ function rungame(jlf::String)
     g.onmousemove_function = getfn(game_module, :on_mouse_move, 2)
     g.screen = initscreen(game_module, "GameZero::"*name)
     clear(g.screen)
-    try
-        playing[] = paused[] = true
-        mainloop(g)
-    catch e
-        if !isa(e, QuitException) && !isa(e, InterruptException)
-            @error e exception = (e, catch_backtrace())
-        end
-    finally
-        GameZero.quitSDL(game[])
-    end
-end
+    return g
+end 
 
 
 function getfn(m::Module, s::Symbol, maxargs=3)
