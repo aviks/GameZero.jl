@@ -1,3 +1,5 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 GameZero = "9da27670-f782-11e9-1da1-f53579315bfe"
+LibGit2 = "76f85450-5226-5b5a-8eaa-529ad045b433"
+Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"

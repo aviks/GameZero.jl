@@ -1,10 +1,17 @@
 
+# Height of the screen
 HEIGHT = 200
+# Width of the screen
 WIDTH = 400
+# Global variables to store a range of colors. 
+# The Colors package is always imported into a game
 colors = range(colorant"black", colorant"white")
 current_color, color_state = iterate(colors)
 
-function draw(g::Game)
+# The draw function is called once per frame to render objects to the screen.
+# In our game, we only define the `draw` function, it's called by the engine. 
+# Within the function, we draw the individual elements, in this case line, rectangles and circles
+function draw()
     fill(current_color)
     draw(Line(50, 100, 350, 100), colorant"white")
     draw(Rect(50, 100, 20, 50), colorant"red", fill=true)
@@ -17,7 +24,11 @@ function draw(g::Game)
 
 end
 
-function update(g::Game)
+# The update function is called once per frame by the game engine, and should be used
+# to change the game state. In this case, we iterate through the color range, and store
+# the current color in a global variable. The global value is then used in the `draw`
+# function to render the screen background
+function update()
     global current_color
     global color_state
     i = iterate(colors, color_state)
@@ -27,5 +38,4 @@ function update(g::Game)
         reverse!(colors)
         current_color, color_state = iterate(colors)
     end
-
 end
