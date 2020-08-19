@@ -4,7 +4,22 @@
 The aim of this package is to remove accidental complexity from the game development process. We therefore always choose simplicity and consistency over features. The users of this package will include young programmers learning their first language, maybe moving up from Scratch. While we aim to support reasonably sophisticated 2D games, our first priority will remain learners, and their teachers.
 
 ## Example
-The best way to learn how to use this package is by looking at code. There are some simple examples in the [example subdirectory](https://github.com/aviks/GameZero.jl/tree/master/example/BasicGame). More comprehensive examples are listed in the [GZExamples](https://github.com/SquidSinker/GZExamples) repository.
+The best way to learn how to use this package is by looking at code. There are some simple examples in the [example subdirectory](https://github.com/aviks/GameZero.jl/tree/master/example/BasicGame). More comprehensive examples are listed in the [GZExamples](https://github.com/SquidSinker/GZExamples) repository. The example source code can also be viewed as part of this documentation -- see the menu on the left. 
+
+## Running Games
+
+Games created using GameZero are `.jl` files that live in any directory. To play the games, start the Julia REPL and:
+
+```
+pkg> add GameZero
+
+pkg> add Colors
+
+julia> using GameZero
+
+julia> rungame("C:\\path\\to\\game\\Spaceship\\Spaceship.jl")
+
+```
 
 ## Assets
 ![](assets/directory_structure.png)
