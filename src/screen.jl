@@ -159,58 +159,48 @@ end
 sdl_colors(c::Colorant) = sdl_colors(convert(ARGB{Colors.FixedPointNumbers.Normed{UInt8,8}}, c))
 sdl_colors(c::ARGB) = Int.(reinterpret.((red(c), green(c), blue(c), alpha(c))))
 
-#Naive Algorithm, should be improved.
+# improved circle drawing algorithm. slower but fills completely. needs optimization
 function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false)
+    centerX = Cint(circle.x)
+    centerY = Cint(circle.y)
+    int_rad = Cint(circle.r)
+    left = centerX - int_rad
+    top = centerY - int_rad
 
     SDL2.SetRenderDrawColor(
         s.renderer,
         sdl_colors(c)...,
     )
-    diameter = Cint(round(circle.r * 2));
 
-    centreX = Cint(round(circle.x))
-    centreY = Cint(round(circle.y))
+    for x in left:centerX
+        for y in top:centerY
 
-    x = Cint(round(circle.r - 1))
-    y = Cint(0)
-    tx = Cint(1)
-    ty = Cint(1)
-    error = (tx - diameter)
+            dist = sqrt( (centerX - x)^2 + (centerY - y)^2 )
+            if (dist <= circle.r + 0.5 && dist >= circle.r - 0.5)
+                rel_x = centerX - x
+                rel_y = centerY - y
 
-    while (x >= y)
-        #Each of the following renders an eight of the circle
-        if !fill
-            SDL2.RenderDrawPoint(s.renderer, centreX + x, centreY - y);
-            SDL2.RenderDrawPoint(s.renderer, centreX + x, centreY + y);
-            SDL2.RenderDrawPoint(s.renderer, centreX - x, centreY - y);
-            SDL2.RenderDrawPoint(s.renderer, centreX - x, centreY + y);
-            SDL2.RenderDrawPoint(s.renderer, centreX + y, centreY - x);
-            SDL2.RenderDrawPoint(s.renderer, centreX + y, centreY + x);
-            SDL2.RenderDrawPoint(s.renderer, centreX - y, centreY - x);
-            SDL2.RenderDrawPoint(s.renderer, centreX - y, centreY + x);
-        else
-            SDL2.RenderDrawLine(s.renderer, centreX, centreY, centreX + x, centreY - y);
-            SDL2.RenderDrawLine(s.renderer, centreX, centreY, centreX + x, centreY + y);
-            SDL2.RenderDrawLine(s.renderer, centreX, centreY, centreX - x, centreY - y);
-            SDL2.RenderDrawLine(s.renderer, centreX, centreY, centreX - x, centreY + y);
-            SDL2.RenderDrawLine(s.renderer, centreX, centreY, centreX + y, centreY - x);
-            SDL2.RenderDrawLine(s.renderer, centreX, centreY, centreX + y, centreY + x);
-            SDL2.RenderDrawLine(s.renderer, centreX, centreY, centreX - y, centreY - x);
-            SDL2.RenderDrawLine(s.renderer, centreX, centreY, centreX - y, centreY + x);
+                quad1 = (x              , y              )
+                quad2 = (centerX + rel_x, y              )
+                quad3 = (x              , centerY + rel_y)
+                quad4 = (quad2[1]       , quad3[2]       )
+
+                SDL2.RenderDrawPoint(s.renderer, quad1[1], quad1[2])
+                SDL2.RenderDrawPoint(s.renderer, quad2[1], quad2[2])
+                SDL2.RenderDrawPoint(s.renderer, quad3[1], quad3[2])
+                SDL2.RenderDrawPoint(s.renderer, quad4[1], quad4[2])
+
+                if (fill == true)
+                    SDL2.RenderDrawLine(s.renderer, quad1[1], quad1[2], quad2[1], quad2[2])
+                    SDL2.RenderDrawLine(s.renderer, quad2[1], quad2[2], quad4[1], quad4[2])
+                    SDL2.RenderDrawLine(s.renderer, quad4[1], quad4[2], quad3[1], quad3[2])
+                    SDL2.RenderDrawLine(s.renderer, quad3[1], quad3[2], quad1[1], quad1[2])
+                end
+            end
+
         end
+    end
 
-        if (error <= 0)
-            y += Cint(1)
-            error += ty
-            ty += Cint(2)
-        end
-
-        if (error > 0)
-            x -= Cint(1)
-            tx += Cint(2)
-            error += (tx - diameter)
-        end
-  end
 end
 
 rect(x::Rect) = x
