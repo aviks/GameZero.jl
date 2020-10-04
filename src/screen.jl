@@ -161,6 +161,7 @@ sdl_colors(c::ARGB) = Int.(reinterpret.((red(c), green(c), blue(c), alpha(c))))
 
 # improved circle drawing algorithm. slower but fills completely. needs optimization
 function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false)
+    # define the center and needed sides of circle
     centerX = Cint(circle.x)
     centerY = Cint(circle.y)
     int_rad = Cint(circle.r)
@@ -172,10 +173,14 @@ function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false
         sdl_colors(c)...,
     )
 
+    # we consider a grid with sides equal to the circle's diameter
     for x in left:centerX
         for y in top:centerY
 
+            # for each pixel in the top left quadrant of the grid we measure the distance from the center.
             dist = sqrt( (centerX - x)^2 + (centerY - y)^2 )
+
+            # if it is close to the circle's radius it and all associated points in the other quadrants are colored in.
             if (dist <= circle.r + 0.5 && dist >= circle.r - 0.5)
                 rel_x = centerX - x
                 rel_y = centerY - y
@@ -190,6 +195,7 @@ function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false
                 SDL2.RenderDrawPoint(s.renderer, quad3[1], quad3[2])
                 SDL2.RenderDrawPoint(s.renderer, quad4[1], quad4[2])
 
+                # if we are told to fill in the circle we draw lines between all of the quadrants to completely fill the circle
                 if (fill == true)
                     SDL2.RenderDrawLine(s.renderer, quad1[1], quad1[2], quad2[1], quad2[2])
                     SDL2.RenderDrawLine(s.renderer, quad2[1], quad2[2], quad4[1], quad4[2])
