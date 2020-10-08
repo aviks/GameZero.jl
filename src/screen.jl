@@ -42,6 +42,17 @@ mutable struct Circle <: Geom
     r::Int
 end
 
+mutable struct Point <: Geom
+    x::Int
+    y::Int
+end
+
+mutable struct Polygon <: Geom
+    x::Int
+    y::Int
+    points::Array{Array{Int, 2}, N} where N
+end
+
 
 Base.convert(T::Type{SDL2.Rect}, r::Rect) = SDL2.Rect(Cint.((r.x, r.y, r.w, r.h))...)
 
@@ -116,6 +127,13 @@ getPos(::Val{:left}, s::Circle) = s.x-s.r
 getPos(::Val{:right}, s::Circle) = s.x+s.r
 getPos(::Val{:centerx}, s::Circle) = s.x
 getPos(::Val{:centery}, s::Circle) = s.y
+
+getPos(::Val{:x}, s::Point) = s.x
+getPos(::Val{:y}, s::Point) = s.y
+
+getPos(::Val{:centerx}, s::Polygon) = s.x
+getPos(::Val{:centery}, s::Polygon) = s.x
+getPos(::Val{:point}, s::Polygon) = s.points[point]
 
 function clear(s::Screen)
     fill(s, s.background)
@@ -206,6 +224,32 @@ function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false
 
         end
     end
+
+end
+
+function draw(s::Screen, point::Point, c::Colorant=colorant"black")
+    SDL2.SetRenderDrawColor(
+        s.renderer,
+        sdl_colors(c)...,
+    )
+
+    SDL2.RenderDrawPoint(s.renderer, point.x, point.y)
+end
+
+# in development
+# fill needs to be done
+function draw(s::Screen, polygon::Polygon, c::Colorant=colorant"black"; fill=false)
+    SDL2.SetRenderDrawColor(
+        s.renderer,
+        sdl_colors(c)...,
+    )
+
+    points_len = length(polygon.points)
+
+    for i in 2:points_len
+        draw(Line(polygon.points[i].x, polygon.points[i].y, polygon.points[i-1].x, polygon.points[i-1].y), c)
+    end
+    draw(Line(popoints[points_len].x, points[points_len].y, points[0].x, points[0].y), c)
 
 end
 
