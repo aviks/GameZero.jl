@@ -50,7 +50,7 @@ end
 mutable struct Polygon <: Geom
     x::Int
     y::Int
-    points::Array{Array{Int, 2}, N} where N
+    points::Array{Array{Int}}
 end
 
 
