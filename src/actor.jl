@@ -66,7 +66,7 @@ function draw(a::Actor)
         game[].screen.renderer, 
         texture, 
         C_NULL,
-        Ref(SDL2.Rect(r.x, r.y, r.w * a.scale[1], r.h * a.scale[2]])),
+        Ref(SDL2.Rect(r.x, r.y, r.w * a.scale[1], r.h * a.scale[2])),
         a.angle,
         C_NULL,
         UInt32(0) )
