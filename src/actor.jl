@@ -3,7 +3,7 @@ mutable struct Actor
     image::String
     surface::Ptr{SDL2.Surface}
     position::Rect
-    scale::Float64
+    scale::Vector{Float64}
     angle::Float64
     data::Dict{Symbol, Any}
 end
@@ -11,7 +11,7 @@ end
 function Actor(image::String; kv...)
     sf=image_surface(image)
     w, h = size(sf)
-    a = Actor(image, sf, Rect(0, 0, Int(w), Int(h)), 1.0 , 0, Dict{Symbol,Any}())
+    a = Actor(image, sf, Rect(0, 0, Int(w), Int(h)), [1.0, 1.0], 0, Dict{Symbol,Any}())
 
     for (k, v) in kv
         setproperty!(a, k, v)
@@ -61,7 +61,17 @@ end
 function draw(a::Actor)
     texture = SDL2.CreateTextureFromSurface(game[].screen.renderer, a.surface)
     r=a.position
-    SDL2.RenderCopy(game[].screen.renderer, texture, C_NULL, Ref(SDL2.Rect(r.x, r.y, r.w, r.h)) )
+    w′ = floor(r.w * a.scale[1])
+    h′ = floor(r.w * a.scale[2])
+    
+    SDL2.RenderCopyEx(
+        game[].screen.renderer, 
+        texture, 
+        C_NULL,
+        Ref(SDL2.Rect(r.x, r.y, w′, h′])),
+        a.angle,
+        C_NULL,
+        UInt32(0) )
 end
 
 """Angle to the horizontal, of the line between two actors, in degrees"""
