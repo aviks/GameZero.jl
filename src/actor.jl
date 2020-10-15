@@ -61,14 +61,12 @@ end
 function draw(a::Actor)
     texture = SDL2.CreateTextureFromSurface(game[].screen.renderer, a.surface)
     r=a.position
-    w′ = floor(r.w * a.scale[1])
-    h′ = floor(r.w * a.scale[2])
     
     SDL2.RenderCopyEx(
         game[].screen.renderer, 
         texture, 
         C_NULL,
-        Ref(SDL2.Rect(r.x, r.y, w′, h′])),
+        Ref(SDL2.Rect(r.x, r.y, r.w * a.scale[1], r.h * a.scale[2]])),
         a.angle,
         C_NULL,
         UInt32(0) )
