@@ -13,7 +13,15 @@ end
 function Actor(image::String; kv...)
     sf=image_surface(image)
     w, h = size(sf)
-    a = Actor(image, sf, Rect(0, 0, Int(w), Int(h)), 1.0 , 0, Dict{Symbol,Any}())
+    a = Actor(
+        image, 
+        sf, 
+        Rect(0, 0, Int(w), Int(h)), 
+        [1., 1.], 
+        [0, 0], 
+        0.0, 
+        Dict{Symbol,Any}()
+    )
 
     for (k, v) in kv
         setproperty!(a, k, v)
@@ -21,6 +29,24 @@ function Actor(image::String; kv...)
     return a
 end
 
+function ActorText(text::String, font_path::String, font_size=24, color=[255,255,0,255]; kv...)
+    font = SDL2.TTF_OpenFont(font_path, font_size)
+    sf = SDL2.TTF_RenderText_Blended(font, text, SDL2.Color(color...))
+    w, h = size(sf)
+    a = Actor(
+        text, 
+        sf, 
+        Rect(0, 0, Int(w), Int(h)), 
+        [1.0, 1.0], 
+        [0.0, 0.0], 
+        0.0, 
+        Dict{Symbol,Any}())
+
+    for (k, v) in kv
+        setproperty!(a, k, v)
+    end
+    return a
+end
 
 function Base.setproperty!(s::Actor, p::Symbol, x)
     if p == :image
