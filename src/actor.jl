@@ -3,10 +3,12 @@ mutable struct Actor
     image::String
     surface::Ptr{SDL2.Surface}
     position::Rect
-    scale::Float64
+    scale::Vector{Float64}
+    center::Vector{Float64}
     angle::Float64
     data::Dict{Symbol, Any}
 end
+
 
 function Actor(image::String; kv...)
     sf=image_surface(image)
