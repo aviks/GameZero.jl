@@ -4,6 +4,7 @@ mutable struct Actor
     surface::Ptr{SDL2.Surface}
     position::Rect
     scale::Vector{Float64}
+    center::Vector{Int}
     angle::Float64
     data::Dict{Symbol, Any}
 end
