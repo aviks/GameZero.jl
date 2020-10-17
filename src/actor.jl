@@ -71,7 +71,9 @@ function draw(a::Actor)
         Ref(SDL2.Rect(r.x, r.y, w′, h′)),
         a.angle,
         C_NULL,
-        UInt32(0) )
+        UInt32(0) 
+    )
+    SDL2.DestroyTexture(texture)
 end
 
 """Angle to the horizontal, of the line between two actors, in degrees"""
