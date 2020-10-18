@@ -48,6 +48,7 @@ function update(g::Game)
         dx = 2
     end
 
+
 end
 
 # If the "space" key is pressed, change the displayed image to the "hurt" variant. 
