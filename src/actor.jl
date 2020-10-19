@@ -5,13 +5,14 @@ mutable struct Actor
     position::Rect
     scale::Vector{Float64}
     angle::Float64
+    alpha::UInt8
     data::Dict{Symbol, Any}
 end
 
 function Actor(image::String; kv...)
     sf=image_surface(image)
     w, h = size(sf)
-    a = Actor(image, sf, Rect(0, 0, Int(w), Int(h)), [1.0, 1.0], 0, Dict{Symbol,Any}())
+    a = Actor(image, sf, Rect(0, 0, Int(w), Int(h)), [1.0, 1.0], 0, 255, Dict{Symbol,Any}())
 
     for (k, v) in kv
         setproperty!(a, k, v)
@@ -63,6 +64,11 @@ function draw(a::Actor)
     r=a.position
     w′=floor(r.w * a.scale[1])
     h′=floor(r.h * a.scale[2])
+
+    if (a.alpha < 255)
+        SDL2.SetTextureBlendMode(texture, SDL2.BLENDMODE_BLEND)
+        SDL2.SetTextureAlphaMod(texture, a.alpha)
+    end
     
     SDL2.RenderCopyEx(
         game[].screen.renderer, 
