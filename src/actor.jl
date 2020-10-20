@@ -6,6 +6,7 @@ mutable struct Actor
     scale::Vector{Float64}
     center::Vector{Int}
     angle::Float64
+    alpha::UInt8
     data::Dict{Symbol, Any}
 end
 
@@ -19,7 +20,8 @@ function Actor(image::String; kv...)
         Rect(0, 0, Int(w), Int(h)), 
         [1., 1.], 
         [0, 0], 
-        0.0, 
+        0.0,
+        255,
         Dict{Symbol,Any}()
     )
 
@@ -40,6 +42,7 @@ function ActorText(text::String, font_path::String, font_size=24, color=Int[255,
         [1., 1.], 
         [0, 0], 
         0.0,
+        255,
         Dict{Symbol,Any}())
 
     for (k, v) in kv
@@ -91,7 +94,12 @@ function draw(a::Actor)
     r=a.position
     w′=floor(r.w * a.scale[1])
     h′=floor(r.h * a.scale[2])
-  
+
+    if (a.alpha < 255)
+        SDL2.SetTextureBlendMode(texture, SDL2.BLENDMODE_BLEND)
+        SDL2.SetTextureAlphaMod(texture, a.alpha)
+    end
+    
     SDL2.RenderCopyEx(
         game[].screen.renderer, 
         texture, 
@@ -99,8 +107,9 @@ function draw(a::Actor)
         Ref(SDL2.Rect(r.x, r.y, w′, h′)),
         a.angle,
         C_NULL,
-        UInt32(0)
+        UInt32(0) 
     )
+    SDL2.DestroyTexture(texture)
 end
 
 """Angle to the horizontal, of the line between two actors, in degrees"""
