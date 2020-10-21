@@ -3,7 +3,7 @@ using Colors
 using Random
 
 export Actor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule,
-        collide, angle, distance, play_music, play_sound, line, clear, rungame
+        collide, angle, distance, play_music, play_sound, line, clear, rungame, game_include
 export Keys, MouseButtons, KeyMods
 export Line, Rect, Circle
 
@@ -73,6 +73,7 @@ end
 
 
 getifdefined(m, s, v) = isdefined(m, s) ? getfield(m, s) : v
+
 
 mainloop(g::Ref{Game}) = mainloop(g[])
 
@@ -224,7 +225,9 @@ function initgame(jlf::String)
     g.screen = initscreen(game_module, "GameZero::"*name)
     clear(g.screen)
     return g
-end 
+end
+
+game_include(jlf::String) = Base.include(game[].game_module, jlf)
 
 
 function getfn(m::Module, s::Symbol, maxargs=3)
