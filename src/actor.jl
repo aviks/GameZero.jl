@@ -60,26 +60,28 @@ function Base.getproperty(s::Actor, p::Symbol)
 end
 
 function draw(a::Actor)
-    texture = SDL2.CreateTextureFromSurface(game[].screen.renderer, a.surface)
     r=a.position
     w′=floor(r.w * a.scale[1])
     h′=floor(r.h * a.scale[2])
 
-    if (a.alpha < 255)
-        SDL2.SetTextureBlendMode(texture, SDL2.BLENDMODE_BLEND)
-        SDL2.SetTextureAlphaMod(texture, a.alpha)
+    if !(:texture in keys(a.data))
+        a.data[:texture] = SDL2.CreateTextureFromSurface(game[].screen.renderer, a.surface)
     end
     
+    if (a.alpha < 255)
+        SDL2.SetTextureBlendMode(a.data[:texture], SDL2.BLENDMODE_BLEND)
+        SDL2.SetTextureAlphaMod(a.data[:texture], a.alpha)
+    end
+
     SDL2.RenderCopyEx(
         game[].screen.renderer, 
-        texture, 
+        a.data[:texture], 
         C_NULL,
         Ref(SDL2.Rect(r.x, r.y, w′, h′)),
         a.angle,
         C_NULL,
         UInt32(0) 
     )
-    SDL2.DestroyTexture(texture)
 end
 
 """Angle to the horizontal, of the line between two actors, in degrees"""
