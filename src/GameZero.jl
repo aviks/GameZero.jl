@@ -172,8 +172,8 @@ getKeyRepeat(e) = bitcat(UInt8, e[14:-1:14])
 getKeyMod(e) = bitcat(UInt16, e[26:-1:25])
 
 getMouseButtonClick(e) = bitcat(UInt8, e[17:-1:17])
-getMouseClickX(e) = bitcat(Int32, e[23:-1:20])
-getMouseClickY(e) = bitcat(Int32, e[27:-1:24])
+getMouseClickX(e) =  bitcat(Int32, e[24:-1:21])
+getMouseClickY(e) = bitcat(Int32, e[28:-1:25])
 
 getMouseMoveX(e) = bitcat(Int32, e[24:-1:21])
 getMouseMoveY(e) = bitcat(Int32, e[28:-1:25])
