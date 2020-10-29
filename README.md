@@ -32,4 +32,6 @@ julia> rungame("C:\\path\\to\\game\\Spaceship\\Spaceship.jl")
 This is an early release. Please try to make new games, and [report](https://github.com/aviks/GameZero.jl/issues) any bugs, usability issues or missing features. We particularly welcome more games in the [GZExamples](https://github.com/SquidSinker/GZExamples) repository.
 
 ## Acknowledgement
-The design of this library is inspired by the python package [PyGameZero](https://pygame-zero.readthedocs.io) by [Daniel Pope](https://github.com/lordmauve). Much of the design however has been changed to make things more Julian, and the implementation is independent. 
+The design of this library is inspired by the python package [PyGameZero](https://pygame-zero.readthedocs.io) by [Daniel Pope](https://github.com/lordmauve). Much of the design however has been changed to make things more Julian, and the implementation is independent.
+
+GameZero uses [SDL2](https://www.libsdl.org/) via the [Julia wrapper](https://github.com/jonathanBieler/SimpleDirectMediaLayer.jl).
