@@ -2,6 +2,8 @@ using Documenter, GameZero
 using Literate
 using LibGit2
 
+# This file is expected to be run with GameZero/docs as the current working directory!
+
 out_path = "src/examples"
 rm("gzexamples"; force=true, recursive=true)
 rm(out_path; force=true, recursive=true )
@@ -39,9 +41,6 @@ makedocs(;
         "API" => "api.md"
     ],
     sitename="GameZero.jl",
-    authors="Avik Sengupta", "Ahan Sengupta"
+    authors="Avik Sengupta, Ahan Sengupta"
 )
 
-deploydocs(;
-    repo="github.com/aviks/GameZero.jl",
-)
