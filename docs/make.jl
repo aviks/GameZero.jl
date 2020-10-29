@@ -2,25 +2,27 @@ using Documenter, GameZero
 using Literate
 using LibGit2
 
-# This file is expected to be run with GameZero/docs as the current working directory!
-
-out_path = "src/examples"
-rm("gzexamples"; force=true, recursive=true)
+docspath=@__DIR__
+out_path = joinpath(docspath, "src", "examples")
+rm(joinpath(docspath, "gzexamples"); force=true, recursive=true)
 rm(out_path; force=true, recursive=true )
 
-LibGit2.clone("https://github.com/SquidSinker/GZExamples", "gzexamples")
+cd(docspath) do 
+    LibGit2.clone("https://github.com/SquidSinker/GZExamples", "gzexamples")
+end
 
 config = Dict{Any, Any}("documenter"=>false, "execute"=>false, "credit"=>false)
-Literate.markdown("../example/BasicGame/basic.jl", out_path; config=config)
-Literate.markdown("../example/BasicGame/basic2.jl", out_path; config=config)
 config["repo_root_url"] = "https://github.com/SquidSinker/GZExamples"
 config["repo_root_path"] = "gzexamples"
-Literate.markdown("gzexamples/Breakout/Breakout.jl", out_path; config=config)
-Literate.markdown("gzexamples/Spaceship/Spaceship.jl", out_path; config=config)
-Literate.markdown("gzexamples/Pandemic Sim/pandemicsim.jl", out_path; config=config)
-Literate.markdown("gzexamples/Galaxian/Galaxian.jl", out_path; config=config)
-Literate.markdown("gzexamples/Flappy bird/flappybird.jl", out_path; config=config)
-Literate.markdown("gzexamples/Tic-tac-toe/tictactoe.jl", out_path; config=config)
+
+Literate.markdown(joinpath(docspath, "..", "example", "BasicGame", "basic.jl"), out_path; config=config)
+Literate.markdown(joinpath(docspath, "..", "example", "BasicGame", "basic2.jl"), out_path; config=config)
+Literate.markdown(joinpath(docspath,"gzexamples", "Breakout", "Breakout.jl"), out_path; config=config)
+Literate.markdown(joinpath(docspath,"gzexamples", "Spaceship", "Spaceship.jl"), out_path; config=config)
+Literate.markdown(joinpath(docspath,"gzexamples", "Pandemic Sim", "pandemicsim.jl"), out_path; config=config)
+Literate.markdown(joinpath(docspath,"gzexamples", "Galaxian", "Galaxian.jl"),  out_path; config=config)
+Literate.markdown(joinpath(docspath,"gzexamples", "Flappy bird", "flappybird.jl"), out_path; config=config)
+Literate.markdown(joinpath(docspath,"gzexamples", "Tic-tac-toe", "tictactoe.jl"), out_path; config=config)
 
 makedocs(;
     modules=[GameZero],
