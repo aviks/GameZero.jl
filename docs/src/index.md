@@ -99,7 +99,7 @@ To set a timer in a normal program, `sleep` would be used. However, in this inst
 
 ## Animation
 To animate an actor, the image is changed several times as seen in the loop below. Better animation is most likely coming very soon.
-```
+```julia
 function shoot_animation()
     global shoot_frame
     if shoot_frame < 16
