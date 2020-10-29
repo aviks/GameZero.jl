@@ -94,7 +94,6 @@ For a constant input, such as for movement, you can check for keypress within th
 ## Mouse input
 Mouse movement can be tracked defining the `on_mouse_move` function in your game. The inputs to the function should be the `Game` object, and the mouse  position as a tuple of numbers. For mouse clicks, use the `on_mouse_down` function, which takes as input the `Game` object, position, and the button.
 
-
 `function on_mouse_move(g::Game, pos)`
 
 `function on_mouse_down(g::Game, pos, button)`
