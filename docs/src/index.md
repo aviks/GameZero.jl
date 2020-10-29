@@ -3,10 +3,10 @@
 ## Overview
 The aim of this package is to remove accidental complexity from the game development process. We therefore always choose simplicity and consistency over features. The users of this package will include young programmers learning their first language, maybe moving up from Scratch. While we aim to support reasonably sophisticated 2D games, our first priority will remain learners, and their teachers.
 
-## Example
+## Examples
 The best way to learn how to use this package is by looking at code. There are some simple examples in the [example subdirectory](https://github.com/aviks/GameZero.jl/tree/master/example/BasicGame). More comprehensive examples are listed in the [GZExamples](https://github.com/SquidSinker/GZExamples) repository. The example source code can also be viewed as part of this documentation -- see the menu on the left. 
 
-## Running Games
+## Running games
 
 Games created using GameZero are `.jl` files that live in any directory. To play the games, start the Julia REPL and:
 
@@ -38,13 +38,24 @@ All of these are optional, and if not specified, will default to 400x400, and a 
 ## Actors
 Game objects on-screen are represented as `Actors` which have several associated attributes. Using `Actors`, you can change position, change the image and check for collisions. However, not all moving parts need to be Actors as those without a specific image can be defined as a `Circle` or a `Rect`, which have the same associated attributes (apart from image). `Actors` are usually the primary game objects that you move around.
 
-## Rects and Circles
+`a = Actor(image.png, xpos, ypos)`
+
+## Rects, circles, and lines
 GameZero.jl also includes basic geometric shapes. `Rects`, `Circles` and `Lines` can be used to do everything an `Actor` can, having the same attributes (apart from image).
+
+```julia
+r = Rect(xpos, ypos, width, height)
+c = Circle(xpos, ypos, radius)
+l = Line(xpos1, ypos1, xpos2, ypos2)
+```
+
+## Drawing in-game objects
+To draw an in-game object, the `draw` function is used, which takes the object (Actor, Line, Rect or Circle) and renders it on-screen at its current position. If taking a shape (i.e. not an Actor), the draw function can also take a `colorant` object from [Colors.jl](https://github.com/JuliaGraphics/Colors.jl). This is done inside the `draw` game loop function (see [Draw and update methods](@ref)).
 
 ## Moving objects
 All objects have many attributes to define position. The corners — `topleft`, `topright`, `bottomleft`, and `bottomright` — are tuples (x and y coordinates). The sides — `top`, `bottom`, `left` and `right` — read either the x or y coordinate (top and bottom are x, left and right are y). These position attributes can be used either to read position or to set position. In addition, objects also have an `x` and `y` attribute which are anchored to the top left of the objects. Finally, the `position` attribute is a synomym for `topleft`
 
-## Draw and Update methods
+## Draw and update methods
 You write a game by defining your own `draw` and `update` methods. These functions are run by the game engine automatically every frame, meaning developers do not have to define their own event loop. The `update` function is used to change game state and attributes of the Actors and the `draw` function renders on-screen objects.
 
 The `draw` method can be defined to take zero or one argument. If present, the single argument is the `Game` object. In other words, define one of
@@ -74,6 +85,11 @@ For a constant input, such as for movement, you can check for keypress within th
 
 ## Mouse input
 Mouse movement can be tracked defining the `on_mouse_move` function in your game. The inputs to the function should be the `Game` object, and the mouse  position as a tuple of numbers. For mouse clicks, use the `on_mouse_down` function, which takes as input the `Game` object, position, and the button.
+
+```julia
+function on_mouse_move(g::Game, pos)
+function on_mouse_down(g::Game, pos, button)
+```
 
 ## Playing sounds
 To play sound effects, you can call the `play_sound` function. To play music on a loop, call the `play_music` function. Both these functions can take `.wav`, `.mp3` and `.ogg` files. 

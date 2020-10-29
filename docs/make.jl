@@ -18,6 +18,7 @@ Literate.markdown("gzexamples/Spaceship/Spaceship.jl", out_path; config=config)
 Literate.markdown("gzexamples/Pandemic Sim/pandemicsim.jl", out_path; config=config)
 Literate.markdown("gzexamples/Galaxian/Galaxian.jl", out_path; config=config)
 Literate.markdown("gzexamples/Flappy bird/flappybird.jl", out_path; config=config)
+Literate.markdown("gzexamples/Tic-tac-toe/tictactoe.jl", out_path; config=config)
 
 makedocs(;
     modules=[GameZero],
@@ -32,12 +33,13 @@ makedocs(;
             "Pandemic Sim" => "examples/pandemicsim.md",
             "Galaxian" => "examples/Galaxian.md",
             "Flappy Bird" => "examples/flappybird.md",
+            "Tic-Tac-Toe" => "examples/tictactoe.md"
 
         ],
         "API" => "api.md"
     ],
     sitename="GameZero.jl",
-    authors="Avik Sengupta"
+    authors="Avik Sengupta", "Ahan Sengupta"
 )
 
 deploydocs(;
