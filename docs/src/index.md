@@ -88,15 +88,14 @@ In other words, you can define one of:
 
 `function on_key_down(g, key, keymod) .... end`
 
-
 For a constant input, such as for movement, you can check for keypress within the `update` function, via the `keyboard` attribute of the game object (`g.keyboard`).
 
 ## Mouse input
 Mouse movement can be tracked defining the `on_mouse_move` function in your game. The inputs to the function should be the `Game` object, and the mouse  position as a tuple of numbers. For mouse clicks, use the `on_mouse_down` function, which takes as input the `Game` object, position, and the button.
 
-`function on_mouse_move(g::Game, pos)`
+`function on_mouse_move(g::Game, pos) .... end`
 
-`function on_mouse_down(g::Game, pos, button)`
+`function on_mouse_down(g::Game, pos, button) .... end`
 
 ## Playing sounds
 To play sound effects, you can call the `play_sound` function. To play music on a loop, call the `play_music` function. Both these functions can take `.wav`, `.mp3` and `.ogg` files. 
