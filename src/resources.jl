@@ -1,4 +1,8 @@
+"""
+play_sound(filename::String, loops::Integer)
 
+Plays a sound effect from the `sounds` subdirctory. It will play the specified number of times. If not specified, it will default to once.
+"""
 function play_sound(name, loops=0)
     sound_file = file_path(name, :sounds)
     sample=SDL2.Mix_LoadWAV(sound_file);
@@ -12,6 +16,11 @@ function play_sound(name, loops=0)
     end
 end
 
+"""
+play_music(name::String, loops::Integer)
+
+Plays music from the `sounds` subdirectory. It will play the file the specified number of times. If not specified, it will default to infinitely.
+"""
 function play_music(name, loops=-1)
     music_file = file_path(name, :music)
     music = SDL2.Mix_LoadMUS(music_file)

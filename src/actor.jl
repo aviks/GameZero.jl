@@ -9,6 +9,11 @@ mutable struct Actor
     data::Dict{Symbol, Any}
 end
 
+"""
+`Actor(image::String)`
+
+Creates an Actor with the image given, which must be located in the `image` subdirectory.
+"""
 function Actor(image::String; kv...)
     sf=image_surface(image)
     w, h = size(sf)
@@ -59,6 +64,11 @@ function Base.getproperty(s::Actor, p::Symbol)
     end
 end
 
+"""
+`draw(a::Actor)`
+
+Draws the Actor on-screen at its current position.
+"""
 function draw(a::Actor)
     texture = SDL2.CreateTextureFromSurface(game[].screen.renderer, a.surface)
     r=a.position
@@ -82,14 +92,27 @@ function draw(a::Actor)
     SDL2.DestroyTexture(texture)
 end
 
-"""Angle to the horizontal, of the line between two actors, in degrees"""
+"""
+`angle(a1::Actor, a2::Actor)`
+
+Angle between the horizontal and the line between two actors. Value returned is in degrees.
+"""
 function Base.angle(a::Actor, target::Actor)
     angle(a, a.pos...)
 end
 
+"""
+`angle(a::Actor, xy::Tuple{Number, Number})`
+
+Angle between the horizontal of the line between an actor and a point in space. Value returned is in degrees.
+"""
 Base.angle(a::Actor, txy::Tuple) = angle(a, txy[1], txy[2])
 
-"""Angle to the horizontal, of the line between an actor and a point in space, in degrees"""
+"""
+`angle(a::Actor, x::Number, y::Number)`
+
+Angle between the horizontal of the line between an actor and a point in space. Value returned is in degrees.
+"""
 function Base.angle(a::Actor, tx, ty)
     myx, myy = a.pos
     dx = tx - myx
@@ -97,12 +120,20 @@ function Base.angle(a::Actor, tx, ty)
     return deg2rad(atan(dy/dx))
 end
 
-"""Distance in pixels between two actors"""
+"""
+`distance(a1::Actor, a2::Actor)`
+
+Distance in pixels between two actors.
+"""
 function distance(a::Actor, target::Actor)
     distance(a, target.pos...)
 end
 
-"""Distance in pixels between an actor and a point in space"""
+"""
+`distance(a::Actor, x::Number, y::Number)`
+
+Distance in pixels between an actor and a point in space
+"""
 function distance(a::Actor, tx, ty)
     myx, myy = a.pos
     dx = tx - myx
@@ -119,6 +150,15 @@ function Base.size(s::Ptr{SDL2.Surface})
     return (ss.w, ss.h)
 end
 
+
+"""
+```
+collide(a, x::Integer, y::Integer)
+collide(a, xy::Tuple{Integer, Integer})
+```
+
+Checks if a (a game object) is colliding with a point.
+"""
 function collide(a, x::Integer, y::Integer)
     a=rect(a)
     return a.x <= x < (a.x + a.w) &&
@@ -127,6 +167,11 @@ end
 
 collide(a, pos::Tuple) = collide(a, pos[1], pos[2])
 
+"""
+`collide(a, b)`
+
+Checks if a and b (both game objects) are colliding.
+"""
 function collide(a, b)
     a=rect(a)
     b=rect(b)
