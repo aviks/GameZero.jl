@@ -36,6 +36,30 @@ end
 
 Line(x::Tuple, y::Tuple) = Line(x[1], x[2], y[1], y[2])
 
+mutable struct Triangle <: Geom
+  p1::Vector{Int}
+  p2::Vector{Int}
+  p3::Vector{Int}
+
+  function Triangle(p1::Vector{Int}, p2::Vector{Int}, p3::Vector{Int})
+    if !(length(p1) == length(p2) == length(p3) == length(p3) == 2)
+      error("Given vectors are of incompatible size.")
+    end
+    return new(p1, p2, p3)
+  end
+
+  function Triangle(x1::Int, y1::Int, x2::Int, y2::Int, x3::Int, y3::Int)
+    new([x1; y1], [x2; y2], [x3; y3])
+  end
+
+  function Triangle(p1::Tuple, p2::Tuple, p3::Tuple)
+    if !(length(p1) == length(p2) == length(p3) == length(p3) == 2)
+      error("Given tuples are of incompatible size.")
+    end
+    return new([p1[1]; p1[2]], [p2[1]; p2[2]], [p3[1]; p3[2]])
+  end
+end
+
 mutable struct Circle <: Geom
     x::Int
     y::Int
@@ -101,6 +125,16 @@ getPos(::Val{:centerright}, s::Rect) = (s.x-s.w, s.y-s.h/2)
 getPos(::Val{:bottomcenter}, s::Rect) = (s.x-s.w/2, s.y-s.h)
 getPos(::Val{:topcenter}, s::Rect) = (s.x-s.w/2, s.y)
 
+# FIXME: Do we need getPos? If we do, then maybe this should belong in
+# utility.jl and convert the array to tuples.
+getPos(::Val{:center}, s::Triangle) = (s.p1 + s.p2 + s.p3) / 3
+getPos(::Val{:left}, s::Triangle) = min(s.p1[1], s.p2[1], s.p3[1])
+getPos(::Val{:right}, s::Triangle) = max(s.p1[1], s.p2[1], s.p3[1])
+getPos(::Val{:top}, s::Triangle) = max(s.p1[2], s.p2[2], s.p3[2])
+getPos(::Val{:bottom}, s::Triangle) = min(s.p1[2], s.p2[2], s.p3[2])
+getPos(::Val{:centerx}, s::Triangle) = (s.p1[1] + s.p2[1] + s.p3[1]) / 3
+getPos(::Val{:centery}, s::Triangle) = (s.p1[2] + s.p2[2] + s.p3[2]) / 3
+
 getPos(::Val{:center}, s::Circle, u, v) = (u, v)
 getPos(::Val{:top}, s::Circle, v) = (s.x, v-s.r)
 getPos(::Val{:bottom}, s::Circle, v) = (s.x, v+s.r)
@@ -158,6 +192,47 @@ end
 
 sdl_colors(c::Colorant) = sdl_colors(convert(ARGB{Colors.FixedPointNumbers.Normed{UInt8,8}}, c))
 sdl_colors(c::ARGB) = Int.(reinterpret.((red(c), green(c), blue(c), alpha(c))))
+
+function draw(s::Screen, tr::Triangle, c::Colorant=colorant"black"; fill=false)
+  p1, p2, p3 = Cint.(tr.p1), Cint.(tr.p2), Cint.(tr.p3)
+  SDL2.SetRenderDrawColor(s.renderer, sdl_colors(c)...)
+  SDL2.RenderDrawLines(s.renderer, [p1; p2; p3; p1], Cint(4))
+
+  ymax = max(p1[2], p2[2], p3[2])
+  ymin = min(p1[2], p2[2], p3[2])
+  if fill && ymin != ymax
+    # Set q1, q2 and q3 in descending order of y-value
+    q1 = (p1[2] != ymax != p2[2]) * p3 +
+        (p2[2] != ymax != p3[2]) * p1 +
+        (p3[2] != ymax != p1[2]) * p2 +
+        (p1[2] == p2[2] == ymax) * p2 +
+        (p2[2] == p3[2] == ymax) * p3 +
+        (p3[2] == p1[2] == ymax) * p1
+    q3 = (p1[2] != ymin != p2[2]) * p3 +
+        (p2[2] != ymin != p3[2]) * p1 +
+        (p3[2] != ymin != p1[2]) * p2 +
+        (p1[2] == p2[2] == ymin) * p2 +
+        (p2[2] == p3[2] == ymin) * p3 +
+        (p3[2] == p1[2] == ymin) * p1
+    q2 = ((q1 == p1 && q3 == p3) || (q1 == p3 && q3 == p1)) * p2 +
+        ((q1 == p1 && q3 == p2) || (q1 == p2 && q3 == p1)) * p3 +
+        ((q1 == p2 && q3 == p3) || (q1 == p3 && q3 == p2)) * p1
+
+    n = q1[2] - q2[2]
+    x0 = q1[1] + (q2[2] - q1[2]) / (q3[2] - q1[2]) * (q3[1] - q1[1])
+    for j = Cint(0):n-Cint(1)
+      r1 = [round(Cint, q2[1] + j / n * (q1[1] - q2[1])); q2[2] + j]
+      r2 = [round(Cint, x0 + j / n * (q1[1] - x0)); q2[2] + j]
+      SDL2.RenderDrawLines(s.renderer, [r1; r2], Cint(2))
+    end
+    n = q2[2] - q3[2]
+    for j = Cint(1):n-Cint(1)
+      r1 = [round(Cint, q2[1] + j / n * (q3[1] - q2[1])); q2[2] - j]
+      r2 = [round(Cint, x0 + j / n * (q3[1] - x0)); q2[2] - j]
+      SDL2.RenderDrawLines(s.renderer, [r1; r2], Cint(2))
+    end
+  end
+end
 
 # improved circle drawing algorithm. slower but fills completely. needs optimization
 function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false)
