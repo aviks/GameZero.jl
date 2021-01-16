@@ -1,26 +1,10 @@
-struct Screen
-    window
-    renderer
-    height::Int
-    width::Int
-    background::ARGB
-
-    function Screen(name, w, h, color)
-        win, renderer = make_win_renderer(name, w, h)
-        if !(color isa ARGB)
-            color = ARGB(color)
-        end
-        new(win, renderer, h, w, color)
-    end
-end
-
 abstract type Geom end
 
 mutable struct Rect <: Geom
-    x::Int
-    y::Int
-    w::Int
-    h::Int
+  x::Int
+  y::Int
+  w::Int
+  h::Int
 end
 Rect(x::Tuple, y::Tuple) = Rect(x[1], x[2], y[1], y[2])
 
@@ -29,10 +13,10 @@ function +(r::Rect, t::Tuple{T,T}) where T <: Number
 end
 
 mutable struct Line <: Geom  
-    x1::Int
-    y1::Int
-    x2::Int
-    y2::Int
+  x1::Int
+  y1::Int
+  x2::Int
+  y2::Int
 end
 
 Line(x::Tuple, y::Tuple) = Line(x[1], x[2], y[1], y[2])
@@ -62,9 +46,9 @@ mutable struct Triangle <: Geom
 end
 
 mutable struct Circle <: Geom
-    x::Int
-    y::Int
-    r::Int
+  x::Int
+  y::Int
+  r::Int
 end
 
 
@@ -73,22 +57,22 @@ function Base.convert(T::Type{SDL2.Rect}, r::Rect)
 end
 
 function Base.setproperty!(s::Geom, p::Symbol, x)
-    if hasfield(typeof(s), p)
-        setfield!(s, p, Int(round(x)))
-    else
-        v = getPos(Val(p), s, x)
-        setfield!(s, :x, Int(round(v[1])))
-        setfield!(s, :y, Int(round(v[2])))
-    end
+  if hasfield(typeof(s), p)
+    setfield!(s, p, Int(round(x)))
+  else
+    v = getPos(Val(p), s, x)
+    setfield!(s, :x, Int(round(v[1])))
+    setfield!(s, :y, Int(round(v[2])))
+  end
 end
 
 function Base.getproperty(s::Geom, p::Symbol) 
-    if hasfield(typeof(s), p)
-        getfield(s, p)
-    else
-        v = getPos(Val(p), s)
-        return v
-    end
+  if hasfield(typeof(s), p)
+    getfield(s, p)
+  else
+    v = getPos(Val(p), s)
+    return v
+  end
 end
 
 getPos(X::Val, s::Geom, v...) = nothing
@@ -154,47 +138,24 @@ getPos(::Val{:right}, s::Circle) = s.x+s.r
 getPos(::Val{:centerx}, s::Circle) = s.x
 getPos(::Val{:centery}, s::Circle) = s.y
 
-function clear(s::Screen)
-    fill(s, s.background)
+function draw(l::T, args...; kv...) where T <: Geom
+  draw(game[].screen, l, args...; kv...)
 end
-
-clear() = clear(game[].screen)
-
-Base.fill(c::Colorant) = Base.fill(game[].screen, c)
-
-function Base.fill(s::Screen, c::Colorant)
-    SDL2.SetRenderDrawColor(
-        s.renderer,
-        sdl_colors(c)...,
-    )
-    SDL2.RenderClear(s.renderer)
-end
-
-draw(l::T, args...; kv...) where T <: Geom = draw(game[].screen, l, args...; kv...)
 
 function draw(s::Screen, l::Line, c::Colorant=colorant"black")
-    SDL2.SetRenderDrawColor(
-        s.renderer,
-        sdl_colors(c)...,
-    )
-    SDL2.RenderDrawLine(s.renderer, Cint.((l.x1, l.y1, l.x2, l.y2))...)
+  SDL2.SetRenderDrawColor(s.renderer, sdl_colors(c)...)
+  SDL2.RenderDrawLine(s.renderer, Cint.((l.x1, l.y1, l.x2, l.y2))...)
 end
 
 function draw(s::Screen, r::Rect, c::Colorant=colorant"black"; fill=false)
-    SDL2.SetRenderDrawColor(
-        s.renderer,
-        sdl_colors(c)...,
-    )
-    sr = convert(SDL2.Rect, r)
-    if !fill
-        SDL2.RenderDrawRect(s.renderer, Ref(sr))
-    else
-        SDL2.RenderFillRect(s.renderer, Ref(sr))
-    end
+  SDL2.SetRenderDrawColor(s.renderer, sdl_colors(c)...)
+  sr = convert(SDL2.Rect, r)
+  if !fill
+    SDL2.RenderDrawRect(s.renderer, Ref(sr))
+  else
+    SDL2.RenderFillRect(s.renderer, Ref(sr))
+  end
 end
-
-sdl_colors(c::Colorant) = sdl_colors(convert(ARGB{Colors.FixedPointNumbers.Normed{UInt8,8}}, c))
-sdl_colors(c::ARGB) = Int.(reinterpret.((red(c), green(c), blue(c), alpha(c))))
 
 function draw(s::Screen, tr::Triangle, c::Colorant=colorant"black"; fill=false)
   p1, p2, p3 = Cint.(tr.p1), Cint.(tr.p2), Cint.(tr.p3)
