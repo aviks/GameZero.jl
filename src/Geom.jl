@@ -198,54 +198,29 @@ function draw(s::Screen, tr::Triangle, c::Colorant=colorant"black"; fill=false)
   end
 end
 
-# improved circle drawing algorithm. slower but fills completely. needs optimization
 function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false)
-    # define the center and needed sides of circle
-    centerX = Cint(circle.x)
-    centerY = Cint(circle.y)
-    int_rad = Cint(circle.r)
-    left = centerX - int_rad
-    top = centerY - int_rad
-
-    SDL2.SetRenderDrawColor(
-        s.renderer,
-        sdl_colors(c)...,
-    )
-
-    # we consider a grid with sides equal to the circle's diameter
-    for x in left:centerX
-        for y in top:centerY
-
-            # for each pixel in the top left quadrant of the grid we measure the distance from the center.
-            dist = sqrt( (centerX - x)^2 + (centerY - y)^2 )
-
-            # if it is close to the circle's radius it and all associated points in the other quadrants are colored in.
-            if (dist <= circle.r + 0.5 && dist >= circle.r - 0.5)
-                rel_x = centerX - x
-                rel_y = centerY - y
-
-                quad1 = (x              , y              )
-                quad2 = (centerX + rel_x, y              )
-                quad3 = (x              , centerY + rel_y)
-                quad4 = (quad2[1]       , quad3[2]       )
-
-                SDL2.RenderDrawPoint(s.renderer, quad1[1], quad1[2])
-                SDL2.RenderDrawPoint(s.renderer, quad2[1], quad2[2])
-                SDL2.RenderDrawPoint(s.renderer, quad3[1], quad3[2])
-                SDL2.RenderDrawPoint(s.renderer, quad4[1], quad4[2])
-
-                # if we are told to fill in the circle we draw lines between all of the quadrants to completely fill the circle
-                if (fill == true)
-                    SDL2.RenderDrawLine(s.renderer, quad1[1], quad1[2], quad2[1], quad2[2])
-                    SDL2.RenderDrawLine(s.renderer, quad2[1], quad2[2], quad4[1], quad4[2])
-                    SDL2.RenderDrawLine(s.renderer, quad4[1], quad4[2], quad3[1], quad3[2])
-                    SDL2.RenderDrawLine(s.renderer, quad3[1], quad3[2], quad1[1], quad1[2])
-                end
-            end
-
-        end
+  SDL2.SetRenderDrawColor(s.renderer, sdl_colors(c)...)
+  r = Cint(circle.r)
+  o = Cint.([circle.x; circle.y])
+  
+  n = ceil(π * r / 2)
+  if fill
+    for j = 0:n
+      x = round(Cint, r * cos(j / n * π / 2))
+      y = round(Cint, r * sin(j / n * π / 2))
+      SDL2.RenderDrawLine(s.renderer, o[1] + x, o[2] + y, o[1] + x, o[2] - y)
+      SDL2.RenderDrawLine(s.renderer, o[1] - x, o[2] + y, o[1] - x, o[2] - y)
     end
-
+  else
+    for j = 0:n
+      x = round(Cint, r * cos(j / n * π / 2))
+      y = round(Cint, r * sin(j / n * π / 2))
+      SDL2.RenderDrawPoint(s.renderer, o[1] + x, o[2] + y)
+      SDL2.RenderDrawPoint(s.renderer, o[1] - x, o[2] + y)
+      SDL2.RenderDrawPoint(s.renderer, o[1] + x, o[2] - y)
+      SDL2.RenderDrawPoint(s.renderer, o[1] - x, o[2] - y)
+    end
+  end
 end
 
 rect(x::Rect) = x
