@@ -141,18 +141,25 @@ end
 
 function schedule_once(f::Function, interval)
     t = elapsed(scheduler[])
-    push!(scheduler[], OnceScheduled(WeakRef(f), t+interval*1e9) )
+    push!(scheduler[], OnceScheduled(WeakRef(f), t+interval*1e9))
     @debug "Added Single Schedule" f
 end
 
 function schedule_unique(f::Function, interval)
     filter(WeakRef(f), scheduler)
-    push!(scheduler[], OnceScheduled(WeakRef(f), elapsed(scheduler[])+interval*1e9) )
+    push!(
+        scheduler[],
+        OnceScheduled(WeakRef(f), elapsed(scheduler[])+interval*1e9)
+       )
     @debug "Added Unique Schedule" f
 end
 
 function schedule_interval(f::Function, interval, first_interval=interval)
-     push!(scheduler[], RepeatScheduled(WeakRef(f), elapsed(scheduler[])+first_interval*1e9), interval*1e9 )
+    push!(
+        scheduler[],
+        RepeatScheduled(WeakRef(f), elapsed(scheduler[])+first_interval*1e9),
+        interval*1e9
+       )
      @debug "Added Repeated Schedule" f
 end
 unschedule(f::Function) = filter!(WeakRef(f), scheduler[])

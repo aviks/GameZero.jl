@@ -6,7 +6,7 @@ struct Screen
     background::ARGB
 
     function Screen(name, w, h, color)
-        win, renderer = makeWinRenderer(name, w, h)
+        win, renderer = make_win_renderer(name, w, h)
         if !(color isa ARGB)
             color = ARGB(color)
         end
@@ -24,8 +24,9 @@ mutable struct Rect <: Geom
 end
 Rect(x::Tuple, y::Tuple) = Rect(x[1], x[2], y[1], y[2])
 
-import Base:+
-+(r::Rect, t::Tuple{T,T}) where T <: Number = Rect(Int(r.x+t[1]), Int(r.y+t[2]), r.h, r.w)
+function +(r::Rect, t::Tuple{T,T}) where T <: Number
+  Rect(Int(r.x+t[1]), Int(r.y+t[2]), r.h, r.w)
+end
 
 mutable struct Line <: Geom  
     x1::Int
@@ -43,7 +44,9 @@ mutable struct Circle <: Geom
 end
 
 
-Base.convert(T::Type{SDL2.Rect}, r::Rect) = SDL2.Rect(Cint.((r.x, r.y, r.w, r.h))...)
+function Base.convert(T::Type{SDL2.Rect}, r::Rect)
+  SDL2.Rect(Cint.((r.x, r.y, r.w, r.h))...)
+end
 
 function Base.setproperty!(s::Geom, p::Symbol, x)
     if hasfield(typeof(s), p)

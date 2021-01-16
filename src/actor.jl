@@ -15,7 +15,7 @@ end
 Creates an Actor with the image given, which must be located in the `image` subdirectory.
 """
 function Actor(image::String; kv...)
-    sf=image_surface(image)
+    sf = image_surface(image)
     w, h = size(sf)
     a = Actor(image, sf, Rect(0, 0, Int(w), Int(h)), [1.0, 1.0], 0, 255, Dict{Symbol,Any}())
 
@@ -71,24 +71,24 @@ Draws the Actor on-screen at its current position.
 """
 function draw(a::Actor)
     texture = SDL2.CreateTextureFromSurface(game[].screen.renderer, a.surface)
-    r=a.position
-    w′=floor(r.w * a.scale[1])
-    h′=floor(r.h * a.scale[2])
+    r = a.position
+    w′ = floor(r.w * a.scale[1])
+    h′ = floor(r.h * a.scale[2])
 
-    if (a.alpha < 255)
+    if a.alpha < 255
         SDL2.SetTextureBlendMode(texture, SDL2.BLENDMODE_BLEND)
         SDL2.SetTextureAlphaMod(texture, a.alpha)
     end
     
     SDL2.RenderCopyEx(
-        game[].screen.renderer, 
-        texture, 
+        game[].screen.renderer,
+        texture,
         C_NULL,
         Ref(SDL2.Rect(r.x, r.y, w′, h′)),
         a.angle,
         C_NULL,
-        UInt32(0) 
-    )
+        UInt32(0)
+       )
     SDL2.DestroyTexture(texture)
 end
 
@@ -141,9 +141,9 @@ function distance(a::Actor, tx, ty)
     return sqrt(dx * dx + dy * dy)
 end
 
-atan2(y, x) = pi - pi/2 * (1 + sign(x)) * (1 - sign(y^2)) - pi/4 * (2 + sign(x)) * sign(y) -
-                            sign(x*y) * atan((abs(x) - abs(y)) / (abs(x) + abs(y)))
-
+atan2(y, x) = pi - pi/2 * (1 + sign(x)) * (1 - sign(y^2)) -
+    pi/4 * (2 + sign(x)) * sign(y) -
+    sign(x*y) * atan((abs(x) - abs(y)) / (abs(x) + abs(y)))
 
 function Base.size(s::Ptr{SDL2.Surface})
     ss = unsafe_load(s)
@@ -160,7 +160,7 @@ collide(a, xy::Tuple{Integer, Integer})
 Checks if a (a game object) is colliding with a point.
 """
 function collide(a, x::Integer, y::Integer)
-    a=rect(a)
+    a = rect(a)
     return a.x <= x < (a.x + a.w) &&
         a.y <= y < (a.y + a.h)
 end
@@ -173,8 +173,8 @@ collide(a, pos::Tuple) = collide(a, pos[1], pos[2])
 Checks if a and b (both game objects) are colliding.
 """
 function collide(a, b)
-    a=rect(a)
-    b=rect(b)
+    a = rect(a)
+    b = rect(b)
     return a.x < b.x + b.w &&
         a.y < b.y + b.h &&
         a.x + a.w > b.x &&

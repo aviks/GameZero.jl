@@ -1,6 +1,7 @@
 module GameZero
 using Colors
 using Random
+import Base: +
 
 export Actor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule,
         collide, angle, distance, play_music, play_sound, line, clear, rungame
@@ -78,7 +79,7 @@ mainloop(g::Ref{Game}) = mainloop(g[])
 
 function mainloop(g::Game)
     start!(timer)
-    while (true)
+    while true
       #Don't run if game is paused by system (resizing, lost focus, etc)
       while window_paused[] != 0
           _ = pollEvent!()
@@ -86,13 +87,13 @@ function mainloop(g::Game)
       end
 
       # Handle Events
-        errorMsg = ""
+        errormsg = ""
         try
-            hadEvents = true
-            while hadEvents
-                e, hadEvents = pollEvent!()
+            hadevents = true
+            while hadevents
+                e, hadevents = pollEvent!()
                 t = getEventType(e)
-                handleEvents!(g, e, t)
+                handle_events!(g, e, t)
             end
         catch e
             rethrow()
@@ -114,69 +115,69 @@ function mainloop(g::Game)
         start!(timer)
         Base.invokelatest(g.update_function, g, dt)
         tick!(scheduler[])
-        if (playing[] == false)
+        if playing[] == false
             throw(QuitException())
         end
     end
 end
 
-function handleEvents!(g::Game, e, t)
+function handle_events!(g::Game, e, t)
     global playing, paused
-    if (t == SDL2.KEYDOWN || t == SDL2.KEYUP)
-        handleKeyPress(g::Game, e, t)
-    elseif (t == SDL2.MOUSEBUTTONUP || t == SDL2.MOUSEBUTTONDOWN)
-        handleMouseClick(g::Game, e, t)
-    #TODO elseif (t == SDL2.MOUSEWHEEL); handleMouseScroll(e)
-    elseif (t == SDL2.MOUSEMOTION)
-        handleMousePan(g::Game, e, t)
-    elseif (t == SDL2.QUIT)
+    if t == SDL2.KEYDOWN || t == SDL2.KEYUP
+        handle_key_press(g::Game, e, t)
+    elseif t == SDL2.MOUSEBUTTONUP || t == SDL2.MOUSEBUTTONDOWN
+        handle_mouse_click(g::Game, e, t)
+    #TODO elseif t == SDL2.MOUSEWHEEL; handleMouseScroll(e)
+    elseif t == SDL2.MOUSEMOTION
+        handle_mouse_pan(g::Game, e, t)
+    elseif t == SDL2.QUIT
         paused[] = playing[] = false
     end
 end
 
-function handleKeyPress(g::Game, e, t)
-    keySym = getKeySym(e)
-    keyMod = getKeyMod(e)
+function handle_key_press(g::Game, e, t)
+    keySym = get_key_sym(e)
+    keyMod = get_key_mod(e)
     @debug "Keyboard" keySym, keyMod
-    if (t == SDL2.KEYDOWN)
+    if t == SDL2.KEYDOWN
         push!(g.keyboard, keySym)
         Base.invokelatest(g.onkey_function, g, Keys.Key(keySym), keyMod)
-    elseif (t == SDL2.KEYUP)
+    elseif t == SDL2.KEYUP
         delete!(g.keyboard, keySym)
     end
-    #keyRepeat = (getKeyRepeat(e) != 0)
+    #keyRepeat = (get_key_repeat(e) != 0)
 end
 
-function handleMouseClick(g::Game, e, t)
-    button = getMouseButtonClick(e)
-    x = getMouseClickX(e)
-    y = getMouseClickY(e)
+function handle_mouse_click(g::Game, e, t)
+    button = get_mouse_button_click(e)
+    x = get_mouse_click_x(e)
+    y = get_mouse_click_y(e)
     @debug "Mouse Button" button, x, y
-    if (t == SDL2.MOUSEBUTTONUP)
+    if t == SDL2.MOUSEBUTTONUP
         Base.invokelatest(g.onmouseup_function, g, (x, y), MouseButtons.MouseButton(button))
-    elseif (t == SDL2.MOUSEBUTTONDOWN)
+    elseif t == SDL2.MOUSEBUTTONDOWN
         Base.invokelatest(g.onmousedown_function, g, (x, y), MouseButtons.MouseButton(button))
     end
 end
 
 
-function handleMousePan(g::Game, e, t)
-    x = getMouseMoveX(e)
-    y = getMouseMoveY(e)
+function handle_mouse_pan(g::Game, e, t)
+    x = get_mouse_move_x(e)
+    y = get_mouse_move_y(e)
     @debug "Mouse Move" x, y
     Base.invokelatest(g.onmousemove_function, g, (x, y))
 end
 
-getKeySym(e) = bitcat(UInt32, e[24:-1:21])
-getKeyRepeat(e) = bitcat(UInt8, e[14:-1:14])
-getKeyMod(e) = bitcat(UInt16, e[26:-1:25])
+get_key_sym(e) = bitcat(UInt32, e[24:-1:21])
+get_key_repeat(e) = bitcat(UInt8, e[14:-1:14])
+get_key_mod(e) = bitcat(UInt16, e[26:-1:25])
 
-getMouseButtonClick(e) = bitcat(UInt8, e[17:-1:17])
-getMouseClickX(e) =  bitcat(Int32, e[24:-1:21])
-getMouseClickY(e) = bitcat(Int32, e[28:-1:25])
+get_mouse_button_click(e) = bitcat(UInt8, e[17:-1:17])
+get_mouse_click_x(e) =  bitcat(Int32, e[24:-1:21])
+get_mouse_click_y(e) = bitcat(Int32, e[28:-1:25])
 
-getMouseMoveX(e) = bitcat(Int32, e[24:-1:21])
-getMouseMoveY(e) = bitcat(Int32, e[28:-1:25])
+get_mouse_move_x(e) = bitcat(Int32, e[24:-1:21])
+get_mouse_move_y(e) = bitcat(Int32, e[28:-1:25])
 
 function rungame(jlf::String)
     global playing, paused
@@ -256,7 +257,7 @@ end
 # pause the interpreter. For release builds, the catch() block will call quitSDL().
 struct QuitException <: Exception end
 
-function getSDLError()
+function get_SDL_error()
     x = SDL2.GetError()
     return unsafe_string(x)
 end
@@ -266,19 +267,19 @@ function initSDL()
     SDL2.GL_SetAttribute(SDL2.GL_MULTISAMPLESAMPLES, 4)
     r = SDL2.Init(UInt32(SDL2.INIT_VIDEO | SDL2.INIT_AUDIO))
     if r != 0
-        error("Uanble to initialise SDL: $(getSDLError())")
+        error("Uanble to initialise SDL: $(get_SDL_error())")
     end
     SDL2.TTF_Init()
 
     mix_init_flags = SDL2.MIX_INIT_FLAC|SDL2.MIX_INIT_MP3|SDL2.MIX_INIT_OGG
     inited = SDL2.Mix_Init(Int32(mix_init_flags))
     if inited & mix_init_flags != mix_init_flags
-        @warn "Failed to initialise audio mixer properly. All sounds may not play correctly\n$(getSDLError())"
+        @warn "Failed to initialise audio mixer properly. All sounds may not play correctly\n$(get_SDL_error())"
     end
 
     device = SDL2.Mix_OpenAudio(Int32(22050), UInt16(SDL2.MIX_DEFAULT_FORMAT), Int32(2), Int32(1024) )
     if device != 0
-        @warn "No audio device available, sounds and music will not play.\n$(getSDLError())"
+        @warn "No audio device available, sounds and music will not play.\n$(get_SDL_error())"
         SDL2.Mix_CloseAudio()
     end
 end

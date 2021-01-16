@@ -28,9 +28,10 @@ function play_music(name, loops=-1)
 end
 
 const resource_ext = Dict(
-        :images=>"[png|jpg|jpeg]",
-        :sounds=>"[mp3|ogg|wav]",
-        :music=>"[mp3|ogg|wav]")
+    :images=>"[png|jpg|jpeg]",
+    :sounds=>"[mp3|ogg|wav]",
+    :music=>"[mp3|ogg|wav]"
+   )
 
 function image_surface(image::String)
     image_file = file_path(image, :images)
