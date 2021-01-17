@@ -1,25 +1,36 @@
+################################################################################
+################################################################################
+# geometric types
+################################################################################
+################################################################################
+
 abstract type Geom end
 
-mutable struct Rect <: Geom
-  x::Int
-  y::Int
-  w::Int
-  h::Int
-end
-Rect(x::Tuple, y::Tuple) = Rect(x[1], x[2], y[1], y[2])
-
-function +(r::Rect, t::Tuple{T,T}) where T <: Number
-  Rect(Int(r.x+t[1]), Int(r.y+t[2]), r.h, r.w)
-end
+################################################################################
+# non-fillable
+################################################################################
 
 mutable struct Line <: Geom  
   x1::Int
   y1::Int
   x2::Int
   y2::Int
+  
+  Line(x::Tuple, y::Tuple) = Line(x[1], x[2], y[1], y[2])
 end
 
-Line(x::Tuple, y::Tuple) = Line(x[1], x[2], y[1], y[2])
+################################################################################
+# fillable
+################################################################################
+
+mutable struct Rect <: Geom
+  x::Int
+  y::Int
+  w::Int
+  h::Int
+
+  Rect(x::Tuple, y::Tuple) = Rect(x[1], x[2], y[1], y[2])
+end
 
 mutable struct Triangle <: Geom
   p1::Vector{Int}
@@ -51,10 +62,23 @@ mutable struct Circle <: Geom
   r::Int
 end
 
+################################################################################
+################################################################################
+# methods
+################################################################################
+################################################################################
+
+function +(r::Rect, t::Tuple{T,T}) where T <: Number
+  Rect(Int(r.x+t[1]), Int(r.y+t[2]), r.h, r.w)
+end
 
 function Base.convert(T::Type{SDL2.Rect}, r::Rect)
   SDL2.Rect(Cint.((r.x, r.y, r.w, r.h))...)
 end
+
+rect(x::Rect) = x
+rect(x::Circle) = Rect(x.left, x.top, 2*x.r, 2*x.r)
+
 
 function Base.setproperty!(s::Geom, p::Symbol, x)
   if hasfield(typeof(s), p)
@@ -74,6 +98,7 @@ function Base.getproperty(s::Geom, p::Symbol)
     return v
   end
 end
+
 
 getPos(X::Val, s::Geom, v...) = nothing
 getPos(X::Val, s::Geom, v::Tuple) = getPos(X, s, v[1], v[2])
@@ -137,6 +162,12 @@ getPos(::Val{:left}, s::Circle) = s.x-s.r
 getPos(::Val{:right}, s::Circle) = s.x+s.r
 getPos(::Val{:centerx}, s::Circle) = s.x
 getPos(::Val{:centery}, s::Circle) = s.y
+
+################################################################################
+################################################################################
+# drawing
+################################################################################
+################################################################################
 
 function draw(l::T, args...; kv...) where T <: Geom
   draw(game[].screen, l, args...; kv...)
@@ -222,6 +253,3 @@ function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false
     end
   end
 end
-
-rect(x::Rect) = x
-rect(x::Circle) = Rect(x.left, x.top, 2*x.r, 2*x.r)
