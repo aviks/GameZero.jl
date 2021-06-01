@@ -28,6 +28,7 @@ const BACKSYMBOL = :BACKGROUND
 mutable struct Game
     screen::Screen
     location::String
+    game_module::Module
     keyboard::Keyboard
     render_function::Function 
     update_function::Function 
@@ -202,27 +203,37 @@ function initgame(jlf::String, external::Bool)
         ArgumentError("File not found: $jlf")
     end
     name = titlecase(replace(basename(jlf), ".jl"=>""))
+    if external
+        module_name = Symbol(name*"_"*randstring(5))
+        game_module = Module(module_name)
+        @debug "Initialised Anonymous Game Module" module_name
+    end
     initSDL()
     game[] = Game()
     scheduler[] = Scheduler()
     g = game[]
     g.location = dirname(jlf)
     g.keyboard = Keyboard()
+    if external 
+        g.game_module = game_module 
+    else 
+        g.game_module = Main 
+    end
 
-    # Base.include_string(Main, "using GameZero")
-    # Base.include_string(Main, "import GameZero.draw")
-    # Base.include_string(Main, "using Colors")
-    # Base.include(Main, jlf)
+    # Base.include_string(g.game_module, "using GameZero")
+    # Base.include_string(g.game_module, "import GameZero.draw")
+    # Base.include_string(g.game_module, "using Colors")
+    # Base.include(g.game_module, jlf)
 
-    if external Base.include(Main, jlf) end
+    if external Base.include(g.game_module, jlf) end
 
-    g.update_function = getfn(Main, :update, 2)
-    g.render_function = getfn(Main, :draw, 1)
-    g.onkey_function = getfn(Main, :on_key_down, 3)
-    g.onmouseup_function = getfn(Main, :on_mouse_up, 3)
-    g.onmousedown_function = getfn(Main, :on_mouse_down, 3)
-    g.onmousemove_function = getfn(Main, :on_mouse_move, 2)
-    g.screen = initscreen(Main, "GameZero::"*name)
+    g.update_function = getfn(g.game_module, :update, 2)
+    g.render_function = getfn(g.game_module, :draw, 1)
+    g.onkey_function = getfn(g.game_module, :on_key_down, 3)
+    g.onmouseup_function = getfn(g.game_module, :on_mouse_up, 3)
+    g.onmousedown_function = getfn(g.game_module, :on_mouse_down, 3)
+    g.onmousemove_function = getfn(g.game_module, :on_mouse_move, 2)
+    g.screen = initscreen(g.game_module, "GameZero::"*name)
     clear(g.screen)
     return g
 end
