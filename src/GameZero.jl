@@ -3,7 +3,7 @@ using Colors
 using Random
 
 export Actor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule,
-        collide, angle, distance, play_music, play_sound, line, clear, rungame
+        collide, angle, distance, play_music, play_sound, line, clear, rungame, game_include
 export Keys, MouseButtons, KeyMods
 export Line, Rect, Circle
 
@@ -73,6 +73,8 @@ end
 
 
 getifdefined(m, s, v) = isdefined(m, s) ? getfield(m, s) : v
+
+game_include(jlf::String) = Base.include(game[].game_module, jlf)
 
 
 mainloop(g::Ref{Game}) = mainloop(g[])
@@ -220,12 +222,12 @@ function initgame(jlf::String, external::Bool)
         g.game_module = Main 
     end
 
-    # Base.include_string(g.game_module, "using GameZero")
-    # Base.include_string(g.game_module, "import GameZero.draw")
-    # Base.include_string(g.game_module, "using Colors")
-    # Base.include(g.game_module, jlf)
-
-    if external Base.include(g.game_module, jlf) end
+    if external
+        Base.include_string(g.game_module, "using GameZero")
+        Base.include_string(g.game_module, "import GameZero.draw")
+        Base.include_string(g.game_module, "using Colors")
+        Base.include(g.game_module, jlf)
+    end
 
     g.update_function = getfn(g.game_module, :update, 2)
     g.render_function = getfn(g.game_module, :draw, 1)
