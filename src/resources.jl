@@ -42,7 +42,7 @@ function image_surface(image::String)
 end
 
 function file_path(name::String, subdir::Symbol)
-    path = joinpath(game[].location, String(subdir))
+    path = joinpath(LOCATION, String(subdir))
     @assert isdir(path)
     allfiles = readdir(path)
     allexts = resource_ext[subdir]

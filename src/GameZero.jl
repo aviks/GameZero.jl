@@ -3,7 +3,7 @@ using Colors
 using Random
 
 export Actor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule,
-        collide, angle, distance, play_music, play_sound, line, clear, rungame
+        collide, angle, distance, play_music, play_sound, line, clear, rungame, game_include
 export Keys, MouseButtons, KeyMods
 export Line, Rect, Circle
 
@@ -22,6 +22,7 @@ include("actor.jl")
 const HEIGHTSYMBOL = :HEIGHT
 const WIDTHSYMBOL = :WIDTH
 const BACKSYMBOL = :BACKGROUND
+const LOCATION = pwd()
 
 
 
@@ -73,6 +74,9 @@ end
 
 
 getifdefined(m, s, v) = isdefined(m, s) ? getfield(m, s) : v
+
+game_include(jlf::String) = Base.include(game[].game_module, jlf)
+
 
 mainloop(g::Ref{Game}) = mainloop(g[])
 
@@ -178,9 +182,9 @@ getMouseClickY(e) = bitcat(Int32, e[28:-1:25])
 getMouseMoveX(e) = bitcat(Int32, e[24:-1:21])
 getMouseMoveY(e) = bitcat(Int32, e[28:-1:25])
 
-function rungame(jlf::String)
+function rungame(jlf::String, external::Bool=true)
     global playing, paused
-    g = initgame(jlf::String)
+    g = initgame(jlf::String, external)
     try
         playing[] = paused[] = true
         mainloop(g)
@@ -193,38 +197,49 @@ function rungame(jlf::String)
     end
 end
 
-function initgame(jlf::String)
+function rungame()
+    rungame(abspath(PROGRAM_FILE), false)
+end
+
+function initgame(jlf::String, external::Bool)
     if !isfile(jlf)
         ArgumentError("File not found: $jlf")
     end
     name = titlecase(replace(basename(jlf), ".jl"=>""))
-    module_name = Symbol(name*"_"*randstring(5))
-    game_module = Module(module_name)
-    @debug "Initialised Anonymous Game Module" module_name
+    if external
+        module_name = Symbol(name*"_"*randstring(5))
+        game_module = Module(module_name)
+        @debug "Initialised Anonymous Game Module" module_name
+    end
     initSDL()
     game[] = Game()
     scheduler[] = Scheduler()
     g = game[]
-    g.game_module = game_module
     g.location = dirname(jlf)
     g.keyboard = Keyboard()
+    if external 
+        g.game_module = game_module 
+    else 
+        g.game_module = Main 
+    end
 
+    if external
+        Base.include_string(g.game_module, "using GameZero")
+        Base.include_string(g.game_module, "import GameZero.draw")
+        Base.include_string(g.game_module, "using Colors")
+        Base.include(g.game_module, jlf)
+    end
 
-    Base.include_string(game_module, "using GameZero")
-    Base.include_string(game_module, "import GameZero.draw")
-    Base.include_string(game_module, "using Colors")
-    Base.include(game_module, jlf)
-
-    g.update_function = getfn(game_module, :update, 2)
-    g.render_function = getfn(game_module, :draw, 1)
-    g.onkey_function = getfn(game_module, :on_key_down, 3)
-    g.onmouseup_function = getfn(game_module, :on_mouse_up, 3)
-    g.onmousedown_function = getfn(game_module, :on_mouse_down, 3)
-    g.onmousemove_function = getfn(game_module, :on_mouse_move, 2)
-    g.screen = initscreen(game_module, "GameZero::"*name)
+    g.update_function = getfn(g.game_module, :update, 2)
+    g.render_function = getfn(g.game_module, :draw, 1)
+    g.onkey_function = getfn(g.game_module, :on_key_down, 3)
+    g.onmouseup_function = getfn(g.game_module, :on_mouse_up, 3)
+    g.onmousedown_function = getfn(g.game_module, :on_mouse_down, 3)
+    g.onmousemove_function = getfn(g.game_module, :on_mouse_move, 2)
+    g.screen = initscreen(g.game_module, "GameZero::"*name)
     clear(g.screen)
     return g
-end 
+end
 
 
 function getfn(m::Module, s::Symbol, maxargs=3)
