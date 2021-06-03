@@ -22,6 +22,7 @@ include("actor.jl")
 const HEIGHTSYMBOL = :HEIGHT
 const WIDTHSYMBOL = :WIDTH
 const BACKSYMBOL = :BACKGROUND
+const LOCATION = pwd()
 
 
 
