@@ -12,6 +12,8 @@ dy = 2
 
 # Create an `Actor` object with an image
 a=Actor("alien.png")
+txt = TextActor("Hello World", "moonhouse")
+txt.pos = (120,180)
 
 # Start playing background music
 play_music("radetzky_ogg")
@@ -19,6 +21,7 @@ play_music("radetzky_ogg")
 # The draw function is called by the framework. All we do here is draw the Actor
 function draw(g::Game)
     draw(a)
+    draw(txt)
 end
 
 # The update function is called every frame. Within the function, we 
