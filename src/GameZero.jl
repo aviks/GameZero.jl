@@ -22,9 +22,6 @@ include("actor.jl")
 const HEIGHTSYMBOL = :HEIGHT
 const WIDTHSYMBOL = :WIDTH
 const BACKSYMBOL = :BACKGROUND
-const LOCATION = pwd()
-
-
 
 mutable struct Game
     screen::Screen
@@ -59,9 +56,6 @@ const game = Ref{Game}()
 const playing = Ref{Bool}(false)
 const paused = Ref{Bool}(false)
 
-function __init__()
-
-end
 
 function initscreen(gm::Module, name::String)
     h = getifdefined(gm, HEIGHTSYMBOL, 400)
@@ -104,7 +98,7 @@ function mainloop(g::Game)
 
       # Render
       #if (debug && debugText) renderFPS(renderer,last_10_frame_times) end
-        SDL2.RenderClear(g.screen.renderer)
+        clear(g.screen)
         Base.invokelatest(g.render_function, g)
         SDL2.RenderPresent(g.screen.renderer)
 
@@ -207,20 +201,22 @@ function initgame(jlf::String, external::Bool)
     end
     name = titlecase(replace(basename(jlf), ".jl"=>""))
     if external
-        module_name = Symbol(name*"_"*randstring(5))
-        game_module = Module(module_name)
-        @debug "Initialised Anonymous Game Module" module_name
+
     end
     initSDL()
     game[] = Game()
     scheduler[] = Scheduler()
     g = game[]
-    g.location = dirname(jlf)
     g.keyboard = Keyboard()
     if external 
+        module_name = Symbol(name*"_"*randstring(5))
+        game_module = Module(module_name)
+        @debug "Initialised Anonymous Game Module" module_name
         g.game_module = game_module 
+        g.location = dirname(jlf)
     else 
         g.game_module = Main 
+        g.location = pwd()
     end
 
     if external

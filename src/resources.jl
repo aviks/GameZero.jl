@@ -30,7 +30,8 @@ end
 const resource_ext = Dict(
         :images=>"[png|jpg|jpeg]",
         :sounds=>"[mp3|ogg|wav]",
-        :music=>"[mp3|ogg|wav]")
+        :music=>"[mp3|ogg|wav]",
+        :fonts=>"[ttf]")
 
 function image_surface(image::String)
     image_file = file_path(image, :images)
@@ -42,7 +43,7 @@ function image_surface(image::String)
 end
 
 function file_path(name::String, subdir::Symbol)
-    path = joinpath(LOCATION, String(subdir))
+    path = joinpath(game[].location, String(subdir))
     @assert isdir(path)
     allfiles = readdir(path)
     allexts = resource_ext[subdir]
