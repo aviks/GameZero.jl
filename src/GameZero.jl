@@ -2,7 +2,7 @@ module GameZero
 using Colors
 using Random
 
-export Actor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule,
+export Actor, TextActor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule,
         collide, angle, distance, play_music, play_sound, line, clear, rungame, game_include
 export Keys, MouseButtons, KeyMods
 export Line, Rect, Triangle, Circle
