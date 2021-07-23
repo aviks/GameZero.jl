@@ -139,20 +139,42 @@ function tick(x::ContingentScheduled, elapsed, s=scheduler[])
     end
 end
 
+"""
+    schedule_once(f::Function, interval)
+
+Takes a function and an interval in seconds, and sets the function to run after that interval.
+"""
 function schedule_once(f::Function, interval)
     t = elapsed(scheduler[])
     push!(scheduler[], OnceScheduled(WeakRef(f), t+interval*1e9) )
     @debug "Added Single Schedule" f
 end
 
+"""
+    schedule_unique(f::Function, interval)
+
+Takes a function and an interval in seconds, and sets the function to run after that interval only if the same function handle was not previously set.
+"""
 function schedule_unique(f::Function, interval)
     filter(WeakRef(f), scheduler)
     push!(scheduler[], OnceScheduled(WeakRef(f), elapsed(scheduler[])+interval*1e9) )
     @debug "Added Unique Schedule" f
 end
 
+"""
+    schedule_interval(f::Function, interval, first_interval=interval)
+
+Takes a function handle and time in seconds, and sets the function to run after that interval. 
+Optional third argument first_interval can be passed to wait for that amount of time before first execution.
+"""
 function schedule_interval(f::Function, interval, first_interval=interval)
      push!(scheduler[], RepeatScheduled(WeakRef(f), elapsed(scheduler[])+first_interval*1e9), interval*1e9 )
      @debug "Added Repeated Schedule" f
 end
+
+"""
+    unschedule(f::Function)
+
+Removes a function from the schedule. 
+"""
 unschedule(f::Function) = filter!(WeakRef(f), scheduler[])
