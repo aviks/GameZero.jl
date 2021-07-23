@@ -152,7 +152,7 @@ function schedule_unique(f::Function, interval)
 end
 
 function schedule_interval(f::Function, interval, first_interval=interval)
-     push!(scheduler[], RepeatScheduled(WeakRef(f), elapsed(scheduler[])+first_interval*1e9), interval*1e9 )
+     push!(scheduler[], RepeatScheduled(WeakRef(f), elapsed(scheduler[])+first_interval*1e9, interval*1e9 ))
      @debug "Added Repeated Schedule" f
 end
 unschedule(f::Function) = filter!(WeakRef(f), scheduler[])
