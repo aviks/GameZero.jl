@@ -25,6 +25,11 @@ function Actor(image::String; kv...)
     return a
 end
 
+"""
+    TextActor(text::String, font_name::String; font_size=24, color=Int[255,255,0,255])
+
+Creates an actor with text rendered using font font_name. Font should be located in fonts directory. 
+"""
 function TextActor(text::String, font_name::String; font_size=24, color=Int[255,255,0,255], kv...)
     font = SDL2.TTF_OpenFont(file_path(font_name, :fonts), font_size)
     sf = SDL2.TTF_RenderText_Blended(font, text, SDL2.Color(color...))

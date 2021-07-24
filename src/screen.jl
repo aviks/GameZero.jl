@@ -16,6 +16,12 @@ end
 
 abstract type Geom end
 
+"""
+`Rect(x::Int,y::Int,w::Int,h::Int)`
+`Rect(x::Tuple, y::Tuple)`
+
+Creates an actor representing a rectangle.
+"""
 mutable struct Rect <: Geom
     x::Int
     y::Int
@@ -27,6 +33,12 @@ Rect(x::Tuple, y::Tuple) = Rect(x[1], x[2], y[1], y[2])
 import Base:+
 +(r::Rect, t::Tuple{T,T}) where T <: Number = Rect(Int(r.x+t[1]), Int(r.y+t[2]), r.h, r.w)
 
+"""
+`Line(x1::Int, y1::Int, x2::Int, y2::Int)`
+`Line(x::Tuple, y::Tuple)`
+
+Creates an actor representing a line. 
+"""
 mutable struct Line <: Geom  
     x1::Int
     y1::Int
