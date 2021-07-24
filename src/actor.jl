@@ -12,7 +12,7 @@ end
 """
 `Actor(image::String)`
 
-Creates an Actor with the image given, which must be located in the `image` subdirectory.
+Creates an Actor with the image given, which must be located in the `images` subdirectory.
 """
 function Actor(image::String; kv...)
     sf=image_surface(image)
