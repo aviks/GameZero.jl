@@ -176,7 +176,21 @@ getMouseClickY(e) = bitcat(Int32, e[28:-1:25])
 getMouseMoveX(e) = bitcat(Int32, e[24:-1:21])
 getMouseMoveY(e) = bitcat(Int32, e[28:-1:25])
 
+"""
+    `rungame(game_file::String)`
+    `rungame()`
+
+    The entry point to GameZero. This is the user-facing function that is used to start a game. 
+    The single argument method should be used from the REPL or main script. It takes the game source
+    file as it's only argument. 
+
+    The zero argument method should be used from the game source file itself when is being executed directly
+"""
 function rungame(jlf::String, external::Bool=true)
+    # The optional argument `external` is used to determine whether the zero or single argument version 
+    # has been called. End users should never have to use this argument directly. 
+    # external=true means rungame has been called from the REPl or run script, with the game file as input
+    # external=false means rungame has been called at the bottom of the game file itself
     global playing, paused
     g = initgame(jlf::String, external)
     try
@@ -200,9 +214,6 @@ function initgame(jlf::String, external::Bool)
         ArgumentError("File not found: $jlf")
     end
     name = titlecase(replace(basename(jlf), ".jl"=>""))
-    if external
-
-    end
     initSDL()
     game[] = Game()
     scheduler[] = Scheduler()

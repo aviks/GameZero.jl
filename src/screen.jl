@@ -100,6 +100,32 @@ function Base.getproperty(s::Geom, p::Symbol)
     end
 end
 
+# A rect is stored as x/y/width/height. The following functions
+# then calculate other metrics dynamically. Some metrics refer to 
+# two dimensions (topright); they return tuples. Some other refer to 
+# a single dimension (top); they return scalars
+# The functions are called from `getproperty` for Rect
+getPos(::Val{:left}, s::Rect) = s.x
+getPos(::Val{:right}, s::Rect) = s.x+s.w
+getPos(::Val{:top}, s::Rect) = s.y
+getPos(::Val{:bottom}, s::Rect) = s.y+s.h
+getPos(::Val{:pos}, s::Rect) = getPos(Val(:topleft), s)
+getPos(::Val{:topleft}, s::Rect) = (s.x, s.y)
+getPos(::Val{:topright}, s::Rect) = (s.x+s.w, s.y)
+getPos(::Val{:bottomleft}, s::Rect) = (s.x, s.y+s.h)
+getPos(::Val{:bottomright}, s::Rect) = (s.x+s.w, s.y+s.h)
+getPos(::Val{:center}, s::Rect) = (s.x+s.w/2, s.y+s.h/2)
+getPos(::Val{:centerx}, s::Rect) = s.x+s.w/2
+getPos(::Val{:centery}, s::Rect) =  s.y+s.h/2
+getPos(::Val{:centerleft}, s::Rect) = (s.x, s.y+s.h/2)
+getPos(::Val{:centerright}, s::Rect) = (s.x+s.w, s.y+s.h/2)
+getPos(::Val{:bottomcenter}, s::Rect) = (s.x+s.w/2, s.y+s.h)
+getPos(::Val{:topcenter}, s::Rect) = (s.x+s.w/2, s.y)
+
+
+# The following functions are used to postion a rectangle using various metrics. 
+# They essentially return the x and y position, given other metrics (eg. bottomleft)
+# These functions are called from `setproperty` for Rect
 getPos(X::Val, s::Geom, v...) = nothing
 getPos(X::Val, s::Geom, v::Tuple) = getPos(X, s, v[1], v[2])
 
@@ -120,25 +146,7 @@ getPos(::Val{:centerright}, s::Rect, u, v) = (u-s.w, v-s.h/2)
 getPos(::Val{:bottomcenter}, s::Rect, u, v) = (u-s.w/2, v-s.h)
 getPos(::Val{:topcenter}, s::Rect, u, v) = (u-s.w/2, v)
 
-getPos(::Val{:left}, s::Rect) = s.x
-getPos(::Val{:right}, s::Rect) = s.x-s.w
-getPos(::Val{:top}, s::Rect) = s.y
-getPos(::Val{:bottom}, s::Rect) = s.y-s.h
-getPos(::Val{:pos}, s::Rect) = getPos(Val(:topleft), s)
-getPos(::Val{:topleft}, s::Rect) = (s.x, s.y)
-getPos(::Val{:topright}, s::Rect) = (s.x+s.w, s.y)
-getPos(::Val{:bottomleft}, s::Rect) = (s.x, s.y+s.h)
-getPos(::Val{:bottomright}, s::Rect) = (s.x-s.w, s.y-s.h)
-getPos(::Val{:center}, s::Rect) = (s.x-s.w/2, s.y-s.h/2)
-getPos(::Val{:centerx}, s::Rect) = s.x-s.w/2
-getPos(::Val{:centery}, s::Rect) =  s.y-s.h/2
-getPos(::Val{:centerleft}, s::Rect) = (s.x, s.y-s.h/2)
-getPos(::Val{:centerright}, s::Rect) = (s.x-s.w, s.y-s.h/2)
-getPos(::Val{:bottomcenter}, s::Rect) = (s.x-s.w/2, s.y-s.h)
-getPos(::Val{:topcenter}, s::Rect) = (s.x-s.w/2, s.y)
 
-# FIXME: Do we need getPos? If we do, then maybe this should belong in
-# utility.jl and convert the array to tuples.
 getPos(::Val{:center}, s::Triangle) = (s.p1 + s.p2 + s.p3) / 3
 getPos(::Val{:left}, s::Triangle) = min(s.p1[1], s.p2[1], s.p3[1])
 getPos(::Val{:right}, s::Triangle) = max(s.p1[1], s.p2[1], s.p3[1])
