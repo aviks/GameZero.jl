@@ -10,7 +10,7 @@ SimpleDirectMediaLayer = "98e33af6-2ee5-5afd-9e75-cbc738b767c4"
 
 [compat]
 Colors = "0.10, 0.11, 0.12"
-SimpleDirectMediaLayer = "0.2"
+SimpleDirectMediaLayer = "0.2, 0.3"
 julia = "1.6"
 
 [extras]
