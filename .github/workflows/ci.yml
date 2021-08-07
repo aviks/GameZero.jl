@@ -22,6 +22,9 @@ jobs:
         arch:
           - x86
           - x64
+        include:
+          - os: ubuntu-latest
+            prefix: xvfb-run
         exclude:
           # Remove some configurations from the build matrix to reduce CI time.
           # See https://github.com/marketplace/actions/setup-julia-environment
@@ -42,3 +45,4 @@ jobs:
       - uses: julia-actions/julia-runtest@latest
         with:
           coverage: false
+          prefix: ${{ matrix.prefix }}
