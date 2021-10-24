@@ -4,7 +4,7 @@ HEIGHT = 400
 # Width of the game window
 WIDTH = 400
 # Background color of the game window
-BACKGROUND = colorant"purple"
+BACKGROUND = "moon.jpg" #colorant"purple"
 
 # Globals to store the velocity of the actor
 dx = 2
