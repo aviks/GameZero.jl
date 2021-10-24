@@ -60,8 +60,11 @@ const paused = Ref{Bool}(false)
 function initscreen(gm::Module, name::String)
     h = getifdefined(gm, HEIGHTSYMBOL, 400)
     w = getifdefined(gm, WIDTHSYMBOL, 600)
-    color = getifdefined(gm, BACKSYMBOL, ARGB(colorant"white"))
-    s = Screen(name, w, h, color)
+    background = getifdefined(gm, BACKSYMBOL, ARGB(colorant"white"))
+    if !(background isa Colorant)
+        background=image_surface(background)
+    end
+    s = Screen(name, w, h, background)
     clear(s)
     return s
 end

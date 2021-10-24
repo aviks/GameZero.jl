@@ -3,16 +3,21 @@ struct Screen
     renderer
     height::Int
     width::Int
-    background::ARGB
+    background::Union{ARGB, Ptr{SDL2.Surface}}
 
-    function Screen(name, w, h, color)
+    function Screen(name, w, h, background)
         win, renderer = makeWinRenderer(name, w, h)
-        if !(color isa ARGB)
-            color = ARGB(color)
-        end
-        new(win, renderer, h, w, color)
+        new(win, renderer, h, w, to_ARGB(background))
     end
 end
+
+#non ARGB colorant is converted to ARGB
+#ARGB colorant is rerturned as is
+# non colorant is returned as is (required since background is stored as an Union )
+to_ARGB(c) = c
+to_ARGB(c::ARGB) = c
+to_ARGB(c::Colorant) = ARGB(c)
+
 
 abstract type Geom end
 
@@ -177,14 +182,18 @@ end
 
 clear() = clear(game[].screen)
 
-Base.fill(c::Colorant) = Base.fill(game[].screen, c)
-
 function Base.fill(s::Screen, c::Colorant)
     SDL2.SetRenderDrawColor(
         s.renderer,
         sdl_colors(c)...,
     )
     SDL2.RenderClear(s.renderer)
+end
+
+function Base.fill(s::Screen, sf::Ptr{SDL2.Surface}) 
+    texture = SDL2.CreateTextureFromSurface(s.renderer, sf)
+    SDL2.RenderCopy(s.renderer, texture, C_NULL, C_NULL)
+    SDL2.DestroyTexture(texture)
 end
 
 draw(l::T, args...; kv...) where T <: Geom = draw(game[].screen, l, args...; kv...)
