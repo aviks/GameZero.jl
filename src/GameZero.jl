@@ -8,12 +8,12 @@ export Keys, MouseButtons, KeyMods
 export Line, Rect, Triangle, Circle
 
 using SimpleDirectMediaLayer
-const SDL2 = SimpleDirectMediaLayer
+using SimpleDirectMediaLayer.LibSDL2
+#const SDL_= SimpleDirectMediaLayer
 
 include("keyboard.jl")
 include("timer.jl")
 include("window.jl")
-include("event.jl")
 include("resources.jl")
 include("screen.jl")
 include("actor.jl")
@@ -89,11 +89,11 @@ function mainloop(g::Game)
       # Handle Events
         errorMsg = ""
         try
-            hadEvents = true
-            while hadEvents
-                e, hadEvents = pollEvent!()
-                t = getEventType(e)
-                handleEvents!(g, e, t)
+            event_ref = Ref{SDL_Event}()
+            while Bool(SDL_PollEvent(event_ref))
+                evt = event_ref[]
+                evt_ty = evt.type
+                handleEvents!(g, evt, evt_ty)
             end
         catch e
             rethrow()
@@ -103,7 +103,7 @@ function mainloop(g::Game)
       #if (debug && debugText) renderFPS(renderer,last_10_frame_times) end
         clear(g.screen)
         Base.invokelatest(g.render_function, g)
-        SDL2.RenderPresent(g.screen.renderer)
+        SDL_RenderPresent(g.screen.renderer)
 
         dt = elapsed(timer)
       # Don't let the game proceed at fewer than this frames per second. If an
@@ -123,61 +123,50 @@ end
 
 function handleEvents!(g::Game, e, t)
     global playing, paused
-    if (t == SDL2.KEYDOWN || t == SDL2.KEYUP)
-        handleKeyPress(g::Game, e, t)
-    elseif (t == SDL2.MOUSEBUTTONUP || t == SDL2.MOUSEBUTTONDOWN)
-        handleMouseClick(g::Game, e, t)
-    #TODO elseif (t == SDL2.MOUSEWHEEL); handleMouseScroll(e)
-    elseif (t == SDL2.MOUSEMOTION)
-        handleMousePan(g::Game, e, t)
-    elseif (t == SDL2.QUIT)
+    if (t == SDL_KEYDOWN || t == SDL_KEYUP)
+        handleEvent(g::Game, e.key)
+    elseif (t == SDL_MOUSEBUTTONUP || t == SDL_MOUSEBUTTONDOWN)
+        handleEvent(g::Game, e.button)
+    #TODO elseif (t == SDL_MOUSEWHEEL); handleMouseScroll(e)
+    elseif (t == SDL_MOUSEMOTION)
+        handleEvent(g::Game, e.motion)
+    elseif (t == SDL_QUIT)
         paused[] = playing[] = false
     end
 end
 
-function handleKeyPress(g::Game, e, t)
-    keySym = getKeySym(e)
-    keyMod = getKeyMod(e)
+function handleEvent(g::Game, e::SDL_KeyboardEvent)
+    keySym = e.keysym.sym
+    keyMod = e.keysym.mod
     @debug "Keyboard" keySym, keyMod
-    if (t == SDL2.KEYDOWN)
+    if (e.type == SDL_KEYDOWN)
         push!(g.keyboard, keySym)
-        Base.invokelatest(g.onkey_function, g, Keys.Key(keySym), keyMod)
-    elseif (t == SDL2.KEYUP)
+        Base.invokelatest(g.onkey_function, g, keySym, keyMod)
+    elseif (e.type == SDL_KEYUP)
         delete!(g.keyboard, keySym)
     end
-    #keyRepeat = (getKeyRepeat(e) != 0)
+    #keyRepeat = (e.repeat != 0)
 end
 
-function handleMouseClick(g::Game, e, t)
-    button = getMouseButtonClick(e)
-    x = getMouseClickX(e)
-    y = getMouseClickY(e)
+function handleEvent(g::Game, e::SDL_MouseButtonEvent)
+    button = e.button
+    x = e.x 
+    y = e.y
     @debug "Mouse Button" button, x, y
-    if (t == SDL2.MOUSEBUTTONUP)
+    if (e.type == SDL_MOUSEBUTTONUP)
         Base.invokelatest(g.onmouseup_function, g, (x, y), MouseButtons.MouseButton(button))
-    elseif (t == SDL2.MOUSEBUTTONDOWN)
+    elseif (e.type == SDL_MOUSEBUTTONDOWN)
         Base.invokelatest(g.onmousedown_function, g, (x, y), MouseButtons.MouseButton(button))
     end
 end
 
 
-function handleMousePan(g::Game, e, t)
-    x = getMouseMoveX(e)
-    y = getMouseMoveY(e)
+function handleEvent(g::Game, e::SDL_MouseMotionEvent)
+    x = e.x
+    y = e.y
     @debug "Mouse Move" x, y
     Base.invokelatest(g.onmousemove_function, g, (x, y))
 end
-
-getKeySym(e) = bitcat(UInt32, e[24:-1:21])
-getKeyRepeat(e) = bitcat(UInt8, e[14:-1:14])
-getKeyMod(e) = bitcat(UInt16, e[26:-1:25])
-
-getMouseButtonClick(e) = bitcat(UInt8, e[17:-1:17])
-getMouseClickX(e) =  bitcat(Int32, e[24:-1:21])
-getMouseClickY(e) = bitcat(Int32, e[28:-1:25])
-
-getMouseMoveX(e) = bitcat(Int32, e[24:-1:21])
-getMouseMoveY(e) = bitcat(Int32, e[28:-1:25])
 
 """
     `rungame(game_file::String)`
@@ -282,29 +271,29 @@ end
 struct QuitException <: Exception end
 
 function getSDLError()
-    x = SDL2.GetError()
+    x = SDL_GetError()
     return unsafe_string(x)
 end
 
 function initSDL()
-    SDL2.GL_SetAttribute(SDL2.GL_MULTISAMPLEBUFFERS, 4)
-    SDL2.GL_SetAttribute(SDL2.GL_MULTISAMPLESAMPLES, 4)
-    r = SDL2.Init(UInt32(SDL2.INIT_VIDEO | SDL2.INIT_AUDIO))
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 4)
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4)
+    r = SDL_Init(UInt32(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
     if r != 0
         error("Uanble to initialise SDL: $(getSDLError())")
     end
-    SDL2.TTF_Init()
+    TTF_Init()
 
-    mix_init_flags = SDL2.MIX_INIT_FLAC|SDL2.MIX_INIT_MP3|SDL2.MIX_INIT_OGG
-    inited = SDL2.Mix_Init(Int32(mix_init_flags))
+    mix_init_flags = MIX_INIT_FLAC|MIX_INIT_MP3|MIX_INIT_OGG
+    inited = Mix_Init(Int32(mix_init_flags))
     if inited & mix_init_flags != mix_init_flags
         @warn "Failed to initialise audio mixer properly. All sounds may not play correctly\n$(getSDLError())"
     end
 
-    device = SDL2.Mix_OpenAudio(Int32(22050), UInt16(SDL2.MIX_DEFAULT_FORMAT), Int32(2), Int32(1024) )
+    device = Mix_OpenAudio(Int32(22050), UInt16(MIX_DEFAULT_FORMAT), Int32(2), Int32(1024) )
     if device != 0
         @warn "No audio device available, sounds and music will not play.\n$(getSDLError())"
-        SDL2.Mix_CloseAudio()
+        Mix_CloseAudio()
     end
 end
 
@@ -313,21 +302,21 @@ function quitSDL(g::Game)
     # https://github.com/n0name/2D_Engine/issues/3
     @debug "Quitting the game"
     clear!(scheduler[])
-    SDL2.DelEventWatch(window_event_watcher_cfunc[], g.screen.window);
-    SDL2.DestroyRenderer(g.screen.renderer)
-    SDL2.DestroyWindow(g.screen.window)
+    SDL_DelEventWatch(window_event_watcher_cfunc[], g.screen.window);
+    SDL_DestroyRenderer(g.screen.renderer)
+    SDL_DestroyWindow(g.screen.window)
     #Run all finalisers
     GC.gc();GC.gc();
     quitSDL()
 end
 
 function quitSDL()
-    SDL2.Mix_HaltMusic()
-    SDL2.Mix_HaltChannel(Int32(-1))
-    SDL2.Mix_CloseAudio()
-    SDL2.TTF_Quit()
-    SDL2.Mix_Quit()
-    SDL2.Quit()
+    Mix_HaltMusic()
+    Mix_HaltChannel(Int32(-1))
+    Mix_CloseAudio()
+    TTF_Quit()
+    Mix_Quit()
+    SDL_Quit()
 end
 
 function main()
