@@ -1,7 +1,7 @@
 
 mutable struct Actor
     image::String
-    surface::Ptr{SDL2.Surface}
+    surface::Ptr{SDL_Surface}
     position::Rect
     scale::Vector{Float64}
     angle::Float64
@@ -31,8 +31,8 @@ end
 Creates an actor with text rendered using font font_name. Font should be located in fonts directory. 
 """
 function TextActor(text::String, font_name::String; font_size=24, color=Int[255,255,0,255], kv...)
-    font = SDL2.TTF_OpenFont(file_path(font_name, :fonts), font_size)
-    sf = SDL2.TTF_RenderText_Blended(font, text, SDL2.Color(color...))
+    font = TTF_OpenFont(file_path(font_name, :fonts), font_size)
+    sf = TTF_RenderText_Blended(font, text, SDL_Color(color...))
     w, h = size(sf)
     a = Actor(
         text, 
@@ -95,26 +95,26 @@ end
 Draws the Actor on-screen at its current position.
 """
 function draw(a::Actor)
-    texture = SDL2.CreateTextureFromSurface(game[].screen.renderer, a.surface)
+    texture = SDL_CreateTextureFromSurface(game[].screen.renderer, a.surface)
     r=a.position
     w′=floor(r.w * a.scale[1])
     h′=floor(r.h * a.scale[2])
 
     if (a.alpha < 255)
-        SDL2.SetTextureBlendMode(texture, SDL2.BLENDMODE_BLEND)
-        SDL2.SetTextureAlphaMod(texture, a.alpha)
+        SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND)
+        SDL_SetTextureAlphaMod(texture, a.alpha)
     end
     
-    SDL2.RenderCopyEx(
+    SDL_RenderCopyEx(
         game[].screen.renderer, 
         texture, 
         C_NULL,
-        Ref(SDL2.Rect(r.x, r.y, w′, h′)),
+        Ref(SDL_Rect(r.x, r.y, w′, h′)),
         a.angle,
         C_NULL,
-        UInt32(0) 
+        SDL_FLIP_NONE
     )
-    SDL2.DestroyTexture(texture)
+    SDL_DestroyTexture(texture)
 end
 
 """
@@ -170,7 +170,7 @@ atan2(y, x) = pi - pi/2 * (1 + sign(x)) * (1 - sign(y^2)) - pi/4 * (2 + sign(x))
                             sign(x*y) * atan((abs(x) - abs(y)) / (abs(x) + abs(y)))
 
 
-function Base.size(s::Ptr{SDL2.Surface})
+function Base.size(s::Ptr{SDL_Surface})
     ss = unsafe_load(s)
     return (ss.w, ss.h)
 end

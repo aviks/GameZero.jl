@@ -3,7 +3,7 @@ struct Screen
     renderer
     height::Int
     width::Int
-    background::Union{ARGB, Ptr{SDL2.Surface}}
+    background::Union{ARGB, Ptr{SDL_Surface}}
 
     function Screen(name, w, h, background)
         win, renderer = makeWinRenderer(name, w, h)
@@ -84,7 +84,7 @@ mutable struct Circle <: Geom
 end
 
 
-Base.convert(T::Type{SDL2.Rect}, r::Rect) = SDL2.Rect(Cint.((r.x, r.y, r.w, r.h))...)
+Base.convert(T::Type{SDL_Rect}, r::Rect) = SDL_Rect(Cint.((r.x, r.y, r.w, r.h))...)
 
 function Base.setproperty!(s::Geom, p::Symbol, x)
     if hasfield(typeof(s), p)
@@ -183,11 +183,11 @@ end
 clear() = clear(game[].screen)
 
 function Base.fill(s::Screen, c::Colorant)
-    SDL2.SetRenderDrawColor(
+    SDL_SetRenderDrawColor(
         s.renderer,
         sdl_colors(c)...,
     )
-    SDL2.RenderClear(s.renderer)
+    SDL_RenderClear(s.renderer)
 end
 
 function Base.fill(s::Screen, sf::Ptr{SDL2.Surface}) 
@@ -199,23 +199,23 @@ end
 draw(l::T, args...; kv...) where T <: Geom = draw(game[].screen, l, args...; kv...)
 
 function draw(s::Screen, l::Line, c::Colorant=colorant"black")
-    SDL2.SetRenderDrawColor(
+    SDL_SetRenderDrawColor(
         s.renderer,
         sdl_colors(c)...,
     )
-    SDL2.RenderDrawLine(s.renderer, Cint.((l.x1, l.y1, l.x2, l.y2))...)
+    SDL_RenderDrawLine(s.renderer, Cint.((l.x1, l.y1, l.x2, l.y2))...)
 end
 
 function draw(s::Screen, r::Rect, c::Colorant=colorant"black"; fill=false)
-    SDL2.SetRenderDrawColor(
+    SDL_SetRenderDrawColor(
         s.renderer,
         sdl_colors(c)...,
     )
-    sr = convert(SDL2.Rect, r)
+    sr = convert(SDL_Rect, r)
     if !fill
-        SDL2.RenderDrawRect(s.renderer, Ref(sr))
+        SDL_RenderDrawRect(s.renderer, Ref(sr))
     else
-        SDL2.RenderFillRect(s.renderer, Ref(sr))
+        SDL_RenderFillRect(s.renderer, Ref(sr))
     end
 end
 
@@ -224,8 +224,8 @@ sdl_colors(c::ARGB) = Int.(reinterpret.((red(c), green(c), blue(c), alpha(c))))
 
 function draw(s::Screen, tr::Triangle, c::Colorant=colorant"black"; fill=false)
   p1, p2, p3 = Cint.(tr.p1), Cint.(tr.p2), Cint.(tr.p3)
-  SDL2.SetRenderDrawColor(s.renderer, sdl_colors(c)...)
-  SDL2.RenderDrawLines(s.renderer, [p1; p2; p3; p1], Cint(4))
+  SDL_SetRenderDrawColor(s.renderer, sdl_colors(c)...)
+  SDL_RenderDrawLines(s.renderer, [p1; p2; p3; p1], Cint(4))
 
   ymax = max(p1[2], p2[2], p3[2])
   ymin = min(p1[2], p2[2], p3[2])
@@ -252,13 +252,13 @@ function draw(s::Screen, tr::Triangle, c::Colorant=colorant"black"; fill=false)
     for j = Cint(0):n-Cint(1)
       r1 = [round(Cint, q2[1] + j / n * (q1[1] - q2[1])); q2[2] + j]
       r2 = [round(Cint, x0 + j / n * (q1[1] - x0)); q2[2] + j]
-      SDL2.RenderDrawLines(s.renderer, [r1; r2], Cint(2))
+      SDL_RenderDrawLines(s.renderer, [r1; r2], Cint(2))
     end
     n = q2[2] - q3[2]
     for j = Cint(1):n-Cint(1)
       r1 = [round(Cint, q2[1] + j / n * (q3[1] - q2[1])); q2[2] - j]
       r2 = [round(Cint, x0 + j / n * (q3[1] - x0)); q2[2] - j]
-      SDL2.RenderDrawLines(s.renderer, [r1; r2], Cint(2))
+      SDL_RenderDrawLines(s.renderer, [r1; r2], Cint(2))
     end
   end
 end
@@ -272,7 +272,7 @@ function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false
     left = centerX - int_rad
     top = centerY - int_rad
 
-    SDL2.SetRenderDrawColor(
+    SDL_SetRenderDrawColor(
         s.renderer,
         sdl_colors(c)...,
     )
@@ -294,17 +294,17 @@ function draw(s::Screen, circle::Circle, c::Colorant=colorant"black"; fill=false
                 quad3 = (x              , centerY + rel_y)
                 quad4 = (quad2[1]       , quad3[2]       )
 
-                SDL2.RenderDrawPoint(s.renderer, quad1[1], quad1[2])
-                SDL2.RenderDrawPoint(s.renderer, quad2[1], quad2[2])
-                SDL2.RenderDrawPoint(s.renderer, quad3[1], quad3[2])
-                SDL2.RenderDrawPoint(s.renderer, quad4[1], quad4[2])
+                SDL_RenderDrawPoint(s.renderer, quad1[1], quad1[2])
+                SDL_RenderDrawPoint(s.renderer, quad2[1], quad2[2])
+                SDL_RenderDrawPoint(s.renderer, quad3[1], quad3[2])
+                SDL_RenderDrawPoint(s.renderer, quad4[1], quad4[2])
 
                 # if we are told to fill in the circle we draw lines between all of the quadrants to completely fill the circle
                 if (fill == true)
-                    SDL2.RenderDrawLine(s.renderer, quad1[1], quad1[2], quad2[1], quad2[2])
-                    SDL2.RenderDrawLine(s.renderer, quad2[1], quad2[2], quad4[1], quad4[2])
-                    SDL2.RenderDrawLine(s.renderer, quad4[1], quad4[2], quad3[1], quad3[2])
-                    SDL2.RenderDrawLine(s.renderer, quad3[1], quad3[2], quad1[1], quad1[2])
+                    SDL_RenderDrawLine(s.renderer, quad1[1], quad1[2], quad2[1], quad2[2])
+                    SDL_RenderDrawLine(s.renderer, quad2[1], quad2[2], quad4[1], quad4[2])
+                    SDL_RenderDrawLine(s.renderer, quad4[1], quad4[2], quad3[1], quad3[2])
+                    SDL_RenderDrawLine(s.renderer, quad3[1], quad3[2], quad1[1], quad1[2])
                 end
             end
 

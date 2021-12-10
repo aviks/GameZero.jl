@@ -3,14 +3,14 @@ play_sound(filename::String, loops::Integer)
 
 Plays a sound effect from the `sounds` subdirctory. It will play the specified number of times. If not specified, it will default to once.
 """
-function play_sound(name, loops=0)
+function play_sound(name, loops=0, ticks=-1)
     sound_file = file_path(name, :sounds)
-    sample=SDL2.Mix_LoadWAV(sound_file);
+    sample=Mix_LoadWAV_RW(SDL_RWFromFile(sound_file, "rb"), 1);
     if sample == C_NULL
         @warn "Could not load sound file: $sound_file\n$(getSDLError())"
         return
     end
-    r = SDL2.Mix_PlayChannel(Int32(-1), sample, Int32(loops))
+    r = Mix_PlayChannelTimed(Int32(-1), sample, loops, ticks)
     if r == -1
         @warn "Unable to play sound $sound_file\n$(getSDLError())"
     end
@@ -23,8 +23,8 @@ Plays music from the `sounds` subdirectory. It will play the file the specified 
 """
 function play_music(name, loops=-1)
     music_file = file_path(name, :music)
-    music = SDL2.Mix_LoadMUS(music_file)
-    SDL2.Mix_PlayMusic( music, Int32(loops) )
+    music = Mix_LoadMUS(music_file)
+    Mix_PlayMusic( music, Int32(loops) )
 end
 
 const resource_ext = Dict(
@@ -35,7 +35,7 @@ const resource_ext = Dict(
 
 function image_surface(image::String)
     image_file = file_path(image, :images)
-    sf = SDL2.IMG_Load(image_file)
+    sf = IMG_Load(image_file)
     if sf == C_NULL
         throw("Error loading $image_file")
     end
