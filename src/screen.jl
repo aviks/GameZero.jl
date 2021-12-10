@@ -3,7 +3,7 @@ struct Screen
     renderer
     height::Int
     width::Int
-    background::Union{ARGB, Ptr{SDL2.Surface}}
+    background::Union{ARGB, Ptr{SDL_Surface}}
 
     function Screen(name, w, h, background)
         win, renderer = makeWinRenderer(name, w, h)

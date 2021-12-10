@@ -9,7 +9,6 @@ export Line, Rect, Triangle, Circle
 
 using SimpleDirectMediaLayer
 using SimpleDirectMediaLayer.LibSDL2
-#const SDL_= SimpleDirectMediaLayer
 
 include("keyboard.jl")
 include("timer.jl")
