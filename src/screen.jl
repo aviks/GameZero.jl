@@ -190,10 +190,10 @@ function Base.fill(s::Screen, c::Colorant)
     SDL_RenderClear(s.renderer)
 end
 
-function Base.fill(s::Screen, sf::Ptr{SDL2.Surface}) 
-    texture = SDL2.CreateTextureFromSurface(s.renderer, sf)
-    SDL2.RenderCopy(s.renderer, texture, C_NULL, C_NULL)
-    SDL2.DestroyTexture(texture)
+function Base.fill(s::Screen, sf::Ptr{SDL_Surface}) 
+    texture = SDL_CreateTextureFromSurface(s.renderer, sf)
+    SDL_RenderCopy(s.renderer, texture, C_NULL, C_NULL)
+    SDL_DestroyTexture(texture)
 end
 
 draw(l::T, args...; kv...) where T <: Geom = draw(game[].screen, l, args...; kv...)
