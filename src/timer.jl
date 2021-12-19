@@ -51,6 +51,7 @@ const scheduler = Ref{Scheduler}()
 elapsed(s::Scheduler) = elapsed(s.timer)
 Base.push!(s::Scheduler, x::Scheduled) = push!(s.actions, x)
 Base.filter!(x::Scheduled, s::Scheduler) = filter!(a->x!=a, s.actions)
+Base.filter!(x::WeakRef, s::Scheduler) = filter!(a->x!=a.action, s.actions)
 clear!(s::Scheduler) = deleteat!(s.actions, 1:length(s.actions))
 
 """
@@ -156,7 +157,7 @@ end
 Takes a function and an interval in seconds, and sets the function to run after that interval only if the same function handle was not previously set.
 """
 function schedule_unique(f::Function, interval)
-    filter(WeakRef(f), scheduler)
+    filter!(WeakRef(f), scheduler[])
     push!(scheduler[], OnceScheduled(WeakRef(f), elapsed(scheduler[])+interval*1e9) )
     @debug "Added Unique Schedule" f
 end
