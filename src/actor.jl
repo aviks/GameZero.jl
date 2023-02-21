@@ -33,6 +33,7 @@ Creates an actor with text rendered using font font_name. Font should be located
 function TextActor(text::String, font_name::String; font_size=24, color=Int[255,255,0,255], kv...)
     font = TTF_OpenFont(file_path(font_name, :fonts), font_size)
     sf = TTF_RenderText_Blended(font, text, SDL_Color(color...))
+    TTF_CloseFont(font)
     w, h = size(sf)
     a = Actor(
         text, 
