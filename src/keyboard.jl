@@ -23,15 +23,15 @@ using .MouseButtons
 # Thus user code to check if X is pressed is written as
 #       ` if game.keyboard.X`
 const singleCharStrings = string.(collect('a':'z'))
-struct KeyHolder; end
-const Keys = KeyHolder()
-function Base.getproperty(k::KeyHolder, s::Symbol)
+struct KeyHolder{T} end
+const Keys = KeyHolder{:SDLK_}()
+const KeyMods = KeyHolder{:KMOD_}()
+function Base.getproperty(k::KeyHolder{T}, s::Symbol) where T
     st=string(s)
-    if findfirst(x->x==lowercase(st), singleCharStrings) !== nothing
+    if length(st)==1 && only(st) in 'A':'Z'
         st = lowercase(st)
     end
-    st = "SDLK_" * st
-    s=Symbol(st)
+    s=Symbol(T,st)
     try 
         return getproperty(GameZero.SimpleDirectMediaLayer.LibSDL2, s)
     catch 

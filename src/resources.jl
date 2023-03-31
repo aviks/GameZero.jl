@@ -3,16 +3,23 @@ play_sound(filename::String, loops::Integer)
 
 Plays a sound effect from the `sounds` subdirctory. It will play the specified number of times. If not specified, it will default to once.
 """
-function play_sound(name, loops=0, ticks=-1)
-    sound_file = file_path(name, :sounds)
-    sample=Mix_LoadWAV_RW(SDL_RWFromFile(sound_file, "rb"), 1);
-    if sample == C_NULL
-        @warn "Could not load sound file: $sound_file\n$(getSDLError())"
-        return
-    end
-    r = Mix_PlayChannelTimed(Int32(-1), sample, loops, ticks)
-    if r == -1
-        @warn "Unable to play sound $sound_file\n$(getSDLError())"
+play_sound = let cache=Dict{Symbol,Ptr}()
+    function _play_sound(name, loops=0, ticks=-1)
+        sample=get(cache,Symbol(name)) do
+            sound_file = file_path(String(name), :sounds)
+            Mix_LoadWAV(sound_file)
+        end
+        if sample == C_NULL
+            @warn "Could not load sound file: $sound_file\n$(getSDLError())"
+            return
+        else
+            cache[Symbol(name)]=sample
+        end
+        r = Mix_PlayChannelTimed(Int32(-1), sample, loops, ticks)
+        if r == -1
+            @warn "Unable to play sound $sound_file\n$(getSDLError())"
+        end
+        # Mix_FreeChunk(sample) #comment this because we cache the chunks
     end
 end
 
@@ -33,14 +40,19 @@ const resource_ext = Dict(
         :music=>"[mp3|ogg|wav]",
         :fonts=>"[ttf]")
 
-function image_surface(image::String)
-    image_file = file_path(image, :images)
-    sf = IMG_Load(image_file)
-    if sf == C_NULL
-        throw("Error loading $image_file")
+image_surface = let cache=Dict{Symbol,Ptr}()
+    function _image_surface(image)
+        get!(cache,Symbol(image)) do 
+            image_file = file_path(String(image), :images)
+            sf = IMG_Load(image_file)
+            if sf == C_NULL
+                throw("Error loading $image_file")
+            end
+            sf
+        end
     end
-    return sf
 end
+
 
 function file_path(name::String, subdir::Symbol)
     path = joinpath(game[].location, String(subdir))

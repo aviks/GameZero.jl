@@ -2,7 +2,7 @@ module GameZero
 using Colors
 using Random
 
-export Actor, TextActor, Game, game, draw, schduler, schedule_once, schedule_interval, schedule_unique, unschedule,
+export Actor, TextActor, Game, game, draw, scheduler, schedule_once, schedule_interval, schedule_unique, unschedule,
         collide, angle, distance, play_music, play_sound, line, clear, rungame, game_include
 export Keys, MouseButtons, KeyMods
 export Line, Rect, Triangle, Circle
@@ -76,12 +76,16 @@ game_include(jlf::String) = Base.include(game[].game_module, jlf)
 
 mainloop(g::Ref{Game}) = mainloop(g[])
 
+pollEvent = let event=Ref{SDL_Event}()
+    ()->SDL_PollEvent(event)
+end
+
 function mainloop(g::Game)
     start!(timer)
     while (true)
       #Don't run if game is paused by system (resizing, lost focus, etc)
       while window_paused[] != 0
-          _ = pollEvent!()
+          _ = pollEvent()
           sleep(0.5)
       end
 

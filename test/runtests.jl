@@ -103,4 +103,18 @@ end
 end
 end
 
+@testset "exported symbols" begin
+    vars = names(GameZero)
+    @test all(isdefined.(Ref(GameZero),vars))
+end
+
+@testset "keys" begin
+    @test Keys.ESCAPE==27
+    @test KeyMods.LALT==0x100
+end
+
+let ev=GameZero.SDL_Event(ntuple(UInt8,56))
+    @test ev.window.event==0x0d
+end
+
 include("examples.jl")
