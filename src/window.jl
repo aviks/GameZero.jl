@@ -24,14 +24,10 @@ end
 # This function handles all window events.
 # We currently do no allow window resizes
 function windowEventWatcher(data_ptr::Ptr{Cvoid}, event_ptr::Ptr{SDL_Event})::Cint
-    global winWidth, winHeight, cam, window_paused, renderer, win
-    ev = unsafe_load(event_ptr, 1)
-    #ee = evt.type
-    #t = UInt32(ee[4]) << 24 | UInt32(ee[3]) << 16 | UInt32(ee[2]) << 8 | ee[1]
-    t = ev.type
-    if (t == SDL_WindowEvent)
-        event = unsafe_load( Ptr{SDL_WindowEvent}(pointer_from_objref(ev)) )
-        winevent = event.event;  # confusing, but that's what the field is called.
+    # global winWidth, winHeight, cam, window_paused, renderer, win
+    ev = unsafe_load(event_ptr)
+    if (ev.type == SDL_WINDOWEVENT)
+        winevent = ev.window.event
         if (winevent == SDL_WINDOWEVENT_FOCUS_LOST || winevent == SDL_WINDOWEVENT_HIDDEN || winevent == SDL_WINDOWEVENT_MINIMIZED)
             # Stop game playing when out of focus
                 window_paused[] = 1

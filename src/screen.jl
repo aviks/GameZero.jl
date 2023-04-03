@@ -315,3 +315,4 @@ end
 
 rect(x::Rect) = x
 rect(x::Circle) = Rect(x.left, x.top, 2*x.r, 2*x.r)
+line(x1,y1,x2,y2)= draw(Line(x1,y1,x2,y2))

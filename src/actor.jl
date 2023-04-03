@@ -143,7 +143,7 @@ function Base.angle(a::Actor, tx, ty)
     myx, myy = a.pos
     dx = tx - myx
     dy = myy - ty
-    return deg2rad(atan(dy/dx))
+    return rad2deg(atan(dy,dx))
 end
 
 """
