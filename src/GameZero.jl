@@ -1,6 +1,7 @@
 module GameZero
 using Colors
 using Random
+using Revise
 
 export Actor, TextActor, Game, game, draw, scheduler, schedule_once, schedule_interval, schedule_unique, unschedule,
         collide, angle, distance, play_music, play_sound, line, clear, rungame, game_include
@@ -121,6 +122,7 @@ function mainloop(g::Game)
         if (playing[] == false)
             throw(QuitException())
         end
+        Revise.revise()
     end
 end
 
@@ -229,7 +231,7 @@ function initgame(jlf::String, external::Bool)
         Base.include_string(g.game_module, "using GameZero")
         Base.include_string(g.game_module, "import GameZero.draw")
         Base.include_string(g.game_module, "using Colors")
-        Base.include(g.game_module, jlf)
+        Revise.includet(g.game_module, jlf)
     end
 
     g.update_function = getfn(g.game_module, :update, 2)
