@@ -26,6 +26,20 @@ julia> rungame("C:\\path\\to\\game\\Spaceship\\Spaceship.jl")
 
 Each game, and its assets, are stored in a separate directory. Within this directory, there is a .jl file, which stores the game code. As well as this, there are three subfolders for sounds, images, and music. The games are executed using the rungame function provided by the Game Zero package, meaning that games do not have to be Julia packages or modules, making it much simpler. An empty file also counts as a valid game.
 
+## Including External Files
+For various reasons, `include` does not work as expected in GameZero.jl. To handle this, there is a
+built-in function, `game_include` that works just like `include` and will import specified external
+files.
+
+```julia
+game_include("your_external_file.jl")
+```
+
+In addition, it is possible to make your external files into Julia modules and include them using
+`import` or `using`. Julia modules allow for easier code management if you are building a larger 
+project. However, if you need quick and simple file inclusion, or if you are still new to Julia,
+we reccomend using `game_include`.
+
 ## Initialising a screen
 To initalise a screen, all that is needed to define a set of three global variables:
 ```
