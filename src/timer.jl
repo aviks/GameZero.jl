@@ -135,7 +135,7 @@ function tick(x::ContingentScheduled, elapsed, s=scheduler[])
         if r == nothing
             return
         else
-            push!(s, ContingetScheduled(x.action, 1e9*r+elapsed))
+            push!(s, ContingentScheduled(x.action, 1e9*r+elapsed))
         end
     end
 end

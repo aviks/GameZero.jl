@@ -3,8 +3,11 @@ play_sound(filename::String, loops::Integer)
 
 Plays a sound effect from the `sounds` subdirctory. It will play the specified number of times. If not specified, it will default to once.
 """
-play_sound = let cache=Dict{Symbol,Ptr}()
-    function _play_sound(name, loops=0, ticks=-1)
+function play_sound end
+let cache=Dict{Symbol,Ptr}()
+    global  play_sound
+    function play_sound(name, loops=0, ticks=-1)
+        sound_file=""
         sample=get(cache,Symbol(name)) do
             sound_file = file_path(String(name), :sounds)
             Mix_LoadWAV(sound_file)
@@ -13,7 +16,7 @@ play_sound = let cache=Dict{Symbol,Ptr}()
             @warn "Could not load sound file: $sound_file\n$(getSDLError())"
             return
         else
-            cache[Symbol(name)]=sample
+            get!(cache,Symbol(name),sample)
         end
         r = Mix_PlayChannelTimed(Int32(-1), sample, loops, ticks)
         if r == -1
@@ -28,10 +31,22 @@ play_music(name::String, loops::Integer)
 
 Plays music from the `sounds` subdirectory. It will play the file the specified number of times. If not specified, it will default to infinitely.
 """
-function play_music(name, loops=-1)
-    music_file = file_path(name, :music)
-    music = Mix_LoadMUS(music_file)
-    Mix_PlayMusic( music, Int32(loops) )
+function play_music end
+let cache=Dict{Symbol,Ptr}()
+    global play_music
+    function play_music(name, loops=-1)
+        music_file = ""
+        music = get(cache,Symbol(name)) do
+            music_file = file_path(name, :music)
+            Mix_LoadMUS(music_file)
+        end
+        if music == C_NULL
+            error( "Could not load music file: $music_file\n$(getSDLError())" )
+        else
+            get!(cache,Symbol(name),music)
+        end
+        Mix_PlayMusic( music, Int32(loops) )
+    end
 end
 
 const resource_ext = Dict(
@@ -46,7 +61,7 @@ image_surface = let cache=Dict{Symbol,Ptr}()
             image_file = file_path(String(image), :images)
             sf = IMG_Load(image_file)
             if sf == C_NULL
-                throw("Error loading $image_file")
+                error("Error loading $image_file")
             end
             sf
         end
