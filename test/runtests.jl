@@ -121,24 +121,17 @@ end
     GameZero.scheduler[] = GameZero.Scheduler()
     flag=false
     f()= (flag=true;nothing)
-    function _sleep(t)
-        t1=Base.time_ns()
-        while true
-            sleep(0.01)
-            Base.time_ns()-t1 > t * 1.0e9 && break
-        end
-    end
 
     @testset "once" begin
         flag=false
         schedule_once(f,1)
         schedule_once(f,0.5)
         @test flag==false
-        _sleep(0.5)
+        sleep(0.5)
         GameZero.tick!(GameZero.scheduler[])
         @test flag==true
         flag=false
-        _sleep(0.5)
+        sleep(0.5)
         GameZero.tick!(GameZero.scheduler[])
         @test flag==true
     end
@@ -148,11 +141,11 @@ end
         schedule_once(f,1)
         schedule_unique(f,0.5)
         @test flag==false
-        _sleep(0.5)
+        sleep(0.5)
         GameZero.tick!(GameZero.scheduler[])
         @test flag==true
         flag=false
-        _sleep(0.5)
+        sleep(0.5)
         GameZero.tick!(GameZero.scheduler[])
         @test flag==false
     end
@@ -161,11 +154,11 @@ end
         flag=false
         schedule_interval(f,1)
         @test flag==false
-        _sleep(1)
+        sleep(1)
         GameZero.tick!(GameZero.scheduler[])
         @test flag==true
         flag=false
-        _sleep(1)
+        sleep(1)
         GameZero.tick!(GameZero.scheduler[])
         @test flag==true
         GameZero.clear!(GameZero.scheduler[])
@@ -179,18 +172,18 @@ end
         flag=false
         schedule_conti(f,1)
         @test flag==false
-        _sleep(1)
+        sleep(1)
         GameZero.tick!(GameZero.scheduler[])
         @test flag==true
 
         flag=false
         schedule_conti(f2,1)
         @test flag==false
-        _sleep(1)
+        sleep(1)
         GameZero.tick!(GameZero.scheduler[])
         @test flag==true
         flag=false
-        _sleep(0.5)
+        sleep(0.5)
         GameZero.tick!(GameZero.scheduler[])
         @test flag==true
     end
