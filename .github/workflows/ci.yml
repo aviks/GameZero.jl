@@ -13,29 +13,19 @@ jobs:
     strategy:
       matrix:
         version:
-          - '1.10'
-          - '1.11'
-          - 'nightly'
+          - '1'
+          - 'lts'
         os:
           - ubuntu-latest
           - macOS-latest
           - windows-latest
-        arch:
-          - x86
-          - x64
         include:
           - os: ubuntu-latest
             prefix: xvfb-run
-        exclude:
-          # Remove some configurations from the build matrix to reduce CI time.
-          # See https://github.com/marketplace/actions/setup-julia-environment
-          # MacOS not available on x86
-          - {os: 'macOS-latest', arch: 'x86'}
-          # Don't test on all versions
-          - {os: 'macOS-latest', version: 'nightly'}
-          - {os: 'windows-latest', version: 'nightly'}
-          - {os: 'windows-latest', arch: 'x86'}
-          - {arch: 'x86', version: 'nightly'}
+          - os: ubuntu-latest
+            version: 'nightly'
+            arch: x64
+            allow_failure: true
     steps:
       - uses: actions/checkout@v1
       - uses: julia-actions/setup-julia@latest
