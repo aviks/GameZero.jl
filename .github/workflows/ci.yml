@@ -24,14 +24,12 @@ jobs:
             prefix: xvfb-run
           - os: ubuntu-latest
             version: 'nightly'
-            arch: x64
             allow_failure: true
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
         with:
