@@ -23,6 +23,7 @@ jobs:
           - os: ubuntu-latest
             prefix: xvfb-run
           - os: ubuntu-latest
+            prefix: xvfb-run
             version: 'nightly'
             allow_failure: true
     steps:
