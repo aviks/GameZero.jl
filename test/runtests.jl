@@ -117,4 +117,77 @@ let ev=GameZero.SDL_Event(ntuple(UInt8,56))
     @test ev.window.event==0x0d
 end
 
+@testset "timer" begin
+    GameZero.scheduler[] = GameZero.Scheduler()
+    flag=false
+    f()= (flag=true;nothing)
+
+    @testset "once" begin
+        flag=false
+        schedule_once(f,1)
+        schedule_once(f,0.5)
+        @test flag==false
+        sleep(0.5)
+        GameZero.tick!(GameZero.scheduler[])
+        @test flag==true
+        flag=false
+        sleep(0.5)
+        GameZero.tick!(GameZero.scheduler[])
+        @test flag==true
+    end
+
+    @testset "unique" begin
+        flag=false
+        schedule_once(f,1)
+        schedule_unique(f,0.5)
+        @test flag==false
+        sleep(0.5)
+        GameZero.tick!(GameZero.scheduler[])
+        @test flag==true
+        flag=false
+        sleep(0.5)
+        GameZero.tick!(GameZero.scheduler[])
+        @test flag==false
+    end
+
+    @testset "interval" begin
+        flag=false
+        schedule_interval(f,1)
+        @test flag==false
+        sleep(1)
+        GameZero.tick!(GameZero.scheduler[])
+        @test flag==true
+        flag=false
+        sleep(1)
+        GameZero.tick!(GameZero.scheduler[])
+        @test flag==true
+        GameZero.clear!(GameZero.scheduler[])
+    end
+
+    function schedule_conti(f::Function, interval)
+        push!(GameZero.scheduler[], GameZero.ContingentScheduled(WeakRef(f), GameZero.elapsed(scheduler[])+interval*1e9))
+    end
+    f2()=(flag=true;0.5)
+    @testset "contingent" begin
+        flag=false
+        schedule_conti(f,1)
+        @test flag==false
+        sleep(1)
+        GameZero.tick!(GameZero.scheduler[])
+        @test flag==true
+
+        flag=false
+        schedule_conti(f2,1)
+        @test flag==false
+        sleep(1)
+        GameZero.tick!(GameZero.scheduler[])
+        @test flag==true
+        flag=false
+        sleep(0.5)
+        GameZero.tick!(GameZero.scheduler[])
+        @test flag==true
+    end
+
+end
+
 include("examples.jl")
