@@ -1,9 +1,8 @@
 # GameZero
 
-[![Build Status](https://github.com/aviks/GameZero.jl/workflows/CI/badge.svg?event=push&branch=master)](https://github.com/aviks/GameZero.jl/actions?query=workflow%3ACI)
+[![Build Status](https://github.com/aviks/GameZero.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/aviks/GameZero.jl/actions/workflows/ci.yml)
 [![version](https://juliahub.com/docs/GameZero/version.svg)](https://juliahub.com/ui/Packages/GameZero/tTDGf)
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliahub.com/docs/GameZero/tTDGf/)
-[![Build Status](https://travis-ci.org/aviks/GameZero.jl.svg?branch=master)](https://travis-ci.com/aviks/GameZero.jl)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://docs.juliahub.com/GameZero/tTDGf/0.3.1/)
 
 A zero overhead game development framework for beginners.
 
