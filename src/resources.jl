@@ -3,16 +3,23 @@ play_sound(filename::String, loops::Integer)
 
 Plays a sound effect from the `sounds` subdirctory. It will play the specified number of times. If not specified, it will default to once.
 """
-function play_sound(name, loops=0)
-    sound_file = file_path(name, :sounds)
-    sample=SDL2.Mix_LoadWAV(sound_file);
-    if sample == C_NULL
-        @warn "Could not load sound file: $sound_file\n$(getSDLError())"
-        return
-    end
-    r = SDL2.Mix_PlayChannel(Int32(-1), sample, Int32(loops))
-    if r == -1
-        @warn "Unable to play sound $sound_file\n$(getSDLError())"
+play_sound = let cache=Dict{Symbol,Ptr}()
+    function _play_sound(name, loops=0, ticks=-1)
+        sample=get(cache,Symbol(name)) do
+            sound_file = file_path(String(name), :sounds)
+            Mix_LoadWAV(sound_file)
+        end
+        if sample == C_NULL
+            @warn "Could not load sound file: $sound_file\n$(getSDLError())"
+            return
+        else
+            cache[Symbol(name)]=sample
+        end
+        r = Mix_PlayChannelTimed(Int32(-1), sample, loops, ticks)
+        if r == -1
+            @warn "Unable to play sound $sound_file\n$(getSDLError())"
+        end
+        # Mix_FreeChunk(sample) #comment this because we cache the chunks
     end
 end
 
@@ -23,23 +30,29 @@ Plays music from the `sounds` subdirectory. It will play the file the specified 
 """
 function play_music(name, loops=-1)
     music_file = file_path(name, :music)
-    music = SDL2.Mix_LoadMUS(music_file)
-    SDL2.Mix_PlayMusic( music, Int32(loops) )
+    music = Mix_LoadMUS(music_file)
+    Mix_PlayMusic( music, Int32(loops) )
 end
 
 const resource_ext = Dict(
         :images=>"[png|jpg|jpeg]",
         :sounds=>"[mp3|ogg|wav]",
-        :music=>"[mp3|ogg|wav]")
+        :music=>"[mp3|ogg|wav]",
+        :fonts=>"[ttf]")
 
-function image_surface(image::String)
-    image_file = file_path(image, :images)
-    sf = SDL2.IMG_Load(image_file)
-    if sf == C_NULL
-        throw("Error loading $image_file")
+image_surface = let cache=Dict{Symbol,Ptr}()
+    function _image_surface(image)
+        get!(cache,Symbol(image)) do 
+            image_file = file_path(String(image), :images)
+            sf = IMG_Load(image_file)
+            if sf == C_NULL
+                throw("Error loading $image_file")
+            end
+            sf
+        end
     end
-    return sf
 end
+
 
 function file_path(name::String, subdir::Symbol)
     path = joinpath(game[].location, String(subdir))

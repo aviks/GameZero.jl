@@ -4,7 +4,7 @@ HEIGHT = 400
 # Width of the game window
 WIDTH = 400
 # Background color of the game window
-BACKGROUND = colorant"purple"
+BACKGROUND = "moon.jpg" #colorant"purple"
 
 # Globals to store the velocity of the actor
 dx = 2
@@ -12,6 +12,8 @@ dy = 2
 
 # Create an `Actor` object with an image
 a=Actor("alien.png")
+txt = TextActor("Hello World", "moonhouse")
+txt.pos = (120,180)
 
 # Start playing background music
 play_music("radetzky_ogg")
@@ -19,6 +21,7 @@ play_music("radetzky_ogg")
 # The draw function is called by the framework. All we do here is draw the Actor
 function draw(g::Game)
     draw(a)
+    draw(txt)
 end
 
 # The update function is called every frame. Within the function, we 
@@ -47,7 +50,6 @@ function update(g::Game)
     elseif g.keyboard.RIGHT
         dx = 2
     end
-
 
 end
 

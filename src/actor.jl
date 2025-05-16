@@ -1,7 +1,7 @@
 
 mutable struct Actor
     image::String
-    surface::Ptr{SDL2.Surface}
+    surface::Ptr{SDL_Surface}
     position::Rect
     scale::Vector{Float64}
     angle::Float64
@@ -12,12 +12,38 @@ end
 """
 `Actor(image::String)`
 
-Creates an Actor with the image given, which must be located in the `image` subdirectory.
+Creates an Actor with the image given, which must be located in the `images` subdirectory.
 """
 function Actor(image::String; kv...)
     sf=image_surface(image)
     w, h = size(sf)
     a = Actor(image, sf, Rect(0, 0, Int(w), Int(h)), [1.0, 1.0], 0, 255, Dict{Symbol,Any}())
+
+    for (k, v) in kv
+        setproperty!(a, k, v)
+    end
+    return a
+end
+
+"""
+    TextActor(text::String, font_name::String; font_size=24, color=Int[255,255,0,255])
+
+Creates an actor with text rendered using font font_name. Font should be located in fonts directory. 
+"""
+function TextActor(text::String, font_name::String; font_size=24, color=Int[255,255,0,255], kv...)
+    font = TTF_OpenFont(file_path(font_name, :fonts), font_size)
+    sf = TTF_RenderUTF8_Blended(font, text, SDL_Color(color...))
+    TTF_CloseFont(font)
+    w, h = size(sf)
+    a = Actor(
+        text, 
+        sf, 
+        Rect(0, 0, Int(w), Int(h)), 
+        [1.,1.], 
+        0,
+        255,
+        Dict{Symbol,Any}()
+    )
 
     for (k, v) in kv
         setproperty!(a, k, v)
@@ -70,26 +96,26 @@ end
 Draws the Actor on-screen at its current position.
 """
 function draw(a::Actor)
-    texture = SDL2.CreateTextureFromSurface(game[].screen.renderer, a.surface)
+    texture = SDL_CreateTextureFromSurface(game[].screen.renderer, a.surface)
     r=a.position
     w′=floor(r.w * a.scale[1])
     h′=floor(r.h * a.scale[2])
 
     if (a.alpha < 255)
-        SDL2.SetTextureBlendMode(texture, SDL2.BLENDMODE_BLEND)
-        SDL2.SetTextureAlphaMod(texture, a.alpha)
+        SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND)
+        SDL_SetTextureAlphaMod(texture, a.alpha)
     end
     
-    SDL2.RenderCopyEx(
+    SDL_RenderCopyEx(
         game[].screen.renderer, 
         texture, 
         C_NULL,
-        Ref(SDL2.Rect(r.x, r.y, w′, h′)),
+        Ref(SDL_Rect(r.x, r.y, w′, h′)),
         a.angle,
         C_NULL,
-        UInt32(0) 
+        SDL_FLIP_NONE
     )
-    SDL2.DestroyTexture(texture)
+    SDL_DestroyTexture(texture)
 end
 
 """
@@ -117,7 +143,7 @@ function Base.angle(a::Actor, tx, ty)
     myx, myy = a.pos
     dx = tx - myx
     dy = myy - ty
-    return deg2rad(atan(dy/dx))
+    return rad2deg(atan(dy,dx))
 end
 
 """
@@ -145,7 +171,7 @@ atan2(y, x) = pi - pi/2 * (1 + sign(x)) * (1 - sign(y^2)) - pi/4 * (2 + sign(x))
                             sign(x*y) * atan((abs(x) - abs(y)) / (abs(x) + abs(y)))
 
 
-function Base.size(s::Ptr{SDL2.Surface})
+function Base.size(s::Ptr{SDL_Surface})
     ss = unsafe_load(s)
     return (ss.w, ss.h)
 end
