@@ -11,7 +11,7 @@ The aim of this package is to remove accidental complexity from the game develop
 
 ## Running Games
 
-Games created using GameZero are `.jl` files that live in any directory. 
+Games created using GameZero are `.jl` files that live in any directory.
 To play the games, start the Julia REPL and:
 
 ```
@@ -26,7 +26,7 @@ julia> rungame("C:\\path\\to\\game\\Spaceship\\Spaceship.jl")
 ```
 
 ## Creating Games
-[Read the documentation](https://juliahub.com/docs/GameZero/tTDGf/) to get started. The best way to learn how to use this package is by looking at existing games created with it. There are some simple examples in the [example subdirectory](https://github.com/aviks/GameZero.jl/tree/master/example/BasicGame). More comprehensive examples are listed in the [GZExamples](https://github.com/SquidSinker/GZExamples) repository. The documentation will also display the example sources. 
+[Read the documentation](https://juliahub.com/docs/GameZero/) to get started. The best way to learn how to use this package is by looking at existing games created with it. There are some simple examples in the [example subdirectory](https://github.com/aviks/GameZero.jl/tree/master/example/BasicGame). More comprehensive examples are listed in the [GZExamples](https://github.com/SquidSinker/GZExamples) repository. The documentation will also display the example sources.
 
 ## Status
 This is an early release. Please try to make new games, and [report](https://github.com/aviks/GameZero.jl/issues) any bugs, usability issues or missing features. We particularly welcome more games in the [GZExamples](https://github.com/SquidSinker/GZExamples) repository.
